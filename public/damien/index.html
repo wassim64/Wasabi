@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualisation des Genres Musicaux</title>
+    <link rel="stylesheet" href="style.css">
+    <script type="text/javascript" src="//d3js.org/d3.v5.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Réseau des Genres Musicaux</h1>
+        
+        <!-- Panneau de contrôle -->
+        <div class="controls">
+            <!-- Filtres de base -->
+            <div class="filter-group">
+                <label for="genreSelect">Genre central :</label>
+                <select id="genreSelect"></select>
+                
+                <label for="depthRange">Profondeur :</label>
+                <input type="range" id="depthRange" min="1" max="5" value="2">
+                <span id="depthValue">2</span>
+                
+                <label for="minConnections">Connexions minimum :</label>
+                <input type="range" id="minConnections" min="1" max="100" value="10">
+                <span id="connectionsValue">10</span>
+            </div>
+
+            <!-- Filtres avancés -->
+            <div class="filter-group">
+                <label for="minSongs">Nombre minimum de chansons :</label>
+                <input type="number" id="minSongs" value="0" min="0">
+                
+                <label for="minArtists">Nombre minimum d'artistes :</label>
+                <input type="number" id="minArtists" value="0" min="0">
+            </div>
+
+            <!-- Boutons de contrôle -->
+            <div class="button-group">
+                <button id="resetFilters">Réinitialiser les filtres</button>
+                <button id="resetZoom">Réinitialiser le zoom</button>
+            </div>
+        </div>
+
+        <div id="chart"></div>
+        
+        <!-- Légende -->
+        <div class="legend">
+            <p>Taille des nœuds : nombre de chansons</p>
+            <p>Épaisseur des liens : force de la connexion</p>
+        </div>
+    </div>
+    <script src="genre_network.js"></script>
+</body>
+</html>
