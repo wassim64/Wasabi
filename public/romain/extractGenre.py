@@ -20,5 +20,5 @@ def extract_genres(json_file_path):
     return genres
 
 # Exemple d'appel
-json_file_path = 'Wasabi/public/json/song.json'
+json_file_path = '../json/song.json'
 extract_genres(json_file_path)
