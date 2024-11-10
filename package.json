@@ -9,6 +9,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.17.1"
+    "@shadcn/ui": "^0.0.4",
+    "express": "^4.17.1",
+    "lucide-react": "^0.454.0"
   }
 }
