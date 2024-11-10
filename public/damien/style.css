@@ -1,0 +1,83 @@
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+}
+
+.controls {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f5f5f5;
+    border-radius: 8px;
+}
+
+.filter-group {
+    margin-bottom: 15px;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.filter-group label {
+    margin-right: 5px;
+}
+
+.button-group {
+    display: flex;
+    gap: 10px;
+}
+
+button {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 4px;
+    background: #4CAF50;
+    color: white;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #45a049;
+}
+
+#chart {
+    width: 100%;
+    height: 800px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: #fff;
+}
+
+.tooltip {
+    position: absolute;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    pointer-events: none;
+    font-size: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.node text {
+    font-family: Arial, sans-serif;
+    font-size: 10px;
+}
+
+.legend {
+    margin-top: 20px;
+    padding: 10px;
+    background: #f5f5f5;
+    border-radius: 4px;
+}
+
+.selected {
+    stroke: #ff0000 !important;
+    stroke-width: 3px !important;
+}
