@@ -29,6 +29,12 @@ const zoom = d3.zoom()
 
 svg.call(zoom);
 
+// Ajouter une variable pour le tooltip des liens
+const linkTooltip = d3.select('body')
+    .append('div')
+    .attr('class', 'link-info')
+    .style('opacity', 0);
+
 // Fonction pour charger et initialiser les données
 function loadData() {
     d3.json('genre_network.json').then(data => {
@@ -80,7 +86,64 @@ function updateVisualization() {
         .enter().append('line')
         .attr('stroke-width', d => linkScale(d.weight))
         .attr('stroke', '#999')
-        .attr('stroke-opacity', 0.6);
+        .attr('stroke-opacity', 0.6)
+        // Ajouter les interactions sur les liens
+        .on('mouseover', function(d) {
+            d3.select(this)
+                .attr('stroke', '#ff4444')
+                .attr('stroke-opacity', 1);
+                
+            linkTooltip.transition()
+                .duration(200)
+                .style('opacity', .9);
+                
+            linkTooltip.html(`
+                <h3>Connexion entre genres</h3>
+                <p>De: ${d.source.id}</p>
+                <p>Vers: ${d.target.id}</p>
+                <p>Force de la connexion: ${d.weight} artistes en commun</p>
+            `)
+                .style('left', (d3.event.pageX + 10) + 'px')
+                .style('top', (d3.event.pageY - 28) + 'px');
+        })
+        .on('mouseout', function() {
+            d3.select(this)
+                .attr('stroke', '#999')
+                .attr('stroke-opacity', 0.6);
+                
+            linkTooltip.transition()
+                .duration(500)
+                .style('opacity', 0);
+        })
+        .on('click', function(d) {
+            // Afficher une boîte de dialogue avec plus d'informations
+            const dialogContent = `
+                <div class="link-details">
+                    <h3>Détails de la connexion</h3>
+                    <p><strong>Genre 1:</strong> ${d.source.id}</p>
+                    <p><strong>Genre 2:</strong> ${d.target.id}</p>
+                    <p><strong>Nombre d'artistes en commun:</strong> ${d.weight}</p>
+                    <p><strong>Pourcentage de connexion:</strong> 
+                        ${Math.round((d.weight / Math.max(
+                            d.source.artistCount, 
+                            d.target.artistCount
+                        )) * 100)}%
+                    </p>
+                </div>
+            `;
+            
+            // Créer une boîte de dialogue modale
+            const modal = d3.select('body')
+                .append('div')
+                .attr('class', 'modal')
+                .style('display', 'block')
+                .html(`
+                    <div class="modal-content">
+                        ${dialogContent}
+                        <button onclick="this.parentElement.parentElement.remove()">Fermer</button>
+                    </div>
+                `);
+        });
 
     // Dessiner les nœuds
     const node = g.append('g')
