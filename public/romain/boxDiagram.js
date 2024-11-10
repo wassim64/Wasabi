@@ -48,13 +48,13 @@ function loadData() {
 
         const zeroDifferenceCount = allData.length - withDate.length;
         document.getElementById("zeroDifferenceCount").textContent =
-            "Nombre d'artistes avec 0 jours de différence : " + zeroDifferenceCount + " sur " + allData.length + " artistes."
-        +"de l'année "+startDate.getFullYear()+" à l'année "+endDate.getFullYear();
+            "Nombre d'artistes avec 0 jours de différence : " + zeroDifferenceCount + " sur " + allData.length + " artistes"
+        +" de l'année "+startDate.getFullYear()+" à l'année "+endDate.getFullYear();
 
         const averageCareerDuration = calculateAverageCareerDuration(withDate);
         document.getElementById("averageCareerDuration").textContent =
             "Durée moyenne de carrière : " + averageCareerDuration.toFixed(1) + " ans"
-            +"de l'année "+startDate.getFullYear()+" à l'année "+endDate.getFullYear();
+            +" de l'année "+startDate.getFullYear()+" à l'année "+endDate.getFullYear();
 
         applyFilter();  // Application du filtre initial
     }).catch(error => {
