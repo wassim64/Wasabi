@@ -11,6 +11,12 @@
     <div class="container">
         <h1>Réseau des Genres Musicaux</h1>
         
+        <!-- Ajouter une description -->
+        <div class="description">
+            <p>Cette visualisation montre les connexions entre les genres musicaux basées sur les artistes qui produisent dans plusieurs genres. 
+            Un lien entre deux genres indique que des artistes ont créé des chansons dans ces deux genres.</p>
+        </div>
+        
         <!-- Panneau de contrôle -->
         <div class="controls">
             <!-- Filtres de base -->
@@ -43,7 +49,15 @@
             </div>
         </div>
 
-        <div id="chart"></div>
+        <div class="visualization-container">
+            <div id="chart"></div>
+            <div id="link-details-panel" class="link-details-panel">
+                <h3>Détails de la connexion</h3>
+                <div id="link-details-content">
+                    <p class="empty-state">Cliquez sur un lien pour voir les détails</p>
+                </div>
+            </div>
+        </div>
         
         <!-- Légende -->
         <div class="legend">

@@ -32,7 +32,7 @@ svg.call(zoom);
 // Ajouter une variable pour le tooltip des liens
 const linkTooltip = d3.select('body')
     .append('div')
-    .attr('class', 'link-info')
+    .attr('class', 'link-tooltip')
     .style('opacity', 0);
 
 // Fonction pour charger et initialiser les données
@@ -87,62 +87,71 @@ function updateVisualization() {
         .attr('stroke-width', d => linkScale(d.weight))
         .attr('stroke', '#999')
         .attr('stroke-opacity', 0.6)
-        // Ajouter les interactions sur les liens
         .on('mouseover', function(d) {
+            // Mettre en surbrillance le lien
             d3.select(this)
                 .attr('stroke', '#ff4444')
                 .attr('stroke-opacity', 1);
-                
+            
+            // Afficher le tooltip
             linkTooltip.transition()
                 .duration(200)
                 .style('opacity', .9);
-                
+            
             linkTooltip.html(`
-                <h3>Connexion entre genres</h3>
-                <p>De: ${d.source.id}</p>
-                <p>Vers: ${d.target.id}</p>
-                <p>Force de la connexion: ${d.weight} artistes en commun</p>
+                ${d.source.id || d.source} ↔ ${d.target.id || d.target}<br>
+                ${d.weight} artistes en commun
             `)
                 .style('left', (d3.event.pageX + 10) + 'px')
                 .style('top', (d3.event.pageY - 28) + 'px');
         })
         .on('mouseout', function() {
-            d3.select(this)
-                .attr('stroke', '#999')
-                .attr('stroke-opacity', 0.6);
-                
+            // Remettre le lien en état normal sauf si sélectionné
+            if (!d3.select(this).classed('selected')) {
+                d3.select(this)
+                    .attr('stroke', '#999')
+                    .attr('stroke-opacity', 0.6);
+            }
+            
             linkTooltip.transition()
                 .duration(500)
                 .style('opacity', 0);
         })
         .on('click', function(d) {
-            // Afficher une boîte de dialogue avec plus d'informations
-            const dialogContent = `
-                <div class="link-details">
-                    <h3>Détails de la connexion</h3>
-                    <p><strong>Genre 1:</strong> ${d.source.id}</p>
-                    <p><strong>Genre 2:</strong> ${d.target.id}</p>
-                    <p><strong>Nombre d'artistes en commun:</strong> ${d.weight}</p>
-                    <p><strong>Pourcentage de connexion:</strong> 
-                        ${Math.round((d.weight / Math.max(
-                            d.source.artistCount, 
-                            d.target.artistCount
-                        )) * 100)}%
-                    </p>
+            // Retirer la sélection précédente
+            d3.selectAll('line').classed('selected', false)
+                .attr('stroke', '#999')
+                .attr('stroke-opacity', 0.6);
+            
+            // Sélectionner ce lien
+            d3.select(this)
+                .classed('selected', true)
+                .attr('stroke', '#ff4444')
+                .attr('stroke-opacity', 1);
+            
+            // Mettre à jour le panneau de détails
+            const sourceGenre = d.source.id || d.source;
+            const targetGenre = d.target.id || d.target;
+            const sourceNode = currentData.nodes.find(n => n.id === sourceGenre);
+            const targetNode = currentData.nodes.find(n => n.id === targetGenre);
+            
+            document.getElementById('link-details-content').innerHTML = `
+                <div class="detail-item">
+                    <div class="detail-label">Genres connectés</div>
+                    <div class="detail-value">${sourceGenre} ↔ ${targetGenre}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Artistes en commun</div>
+                    <div class="detail-value">${d.weight}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Statistiques des genres</div>
+                    <div class="detail-value">
+                        ${sourceGenre}: ${sourceNode.artistCount} artistes, ${sourceNode.songCount} chansons<br>
+                        ${targetGenre}: ${targetNode.artistCount} artistes, ${targetNode.songCount} chansons
+                    </div>
                 </div>
             `;
-            
-            // Créer une boîte de dialogue modale
-            const modal = d3.select('body')
-                .append('div')
-                .attr('class', 'modal')
-                .style('display', 'block')
-                .html(`
-                    <div class="modal-content">
-                        ${dialogContent}
-                        <button onclick="this.parentElement.parentElement.remove()">Fermer</button>
-                    </div>
-                `);
         });
 
     // Dessiner les nœuds
