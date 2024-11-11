@@ -27,9 +27,9 @@ def process_json_files(filename_path):
         for song in ijson.items(file, 'item'):  # 'item' pour chaque chanson
             
             if "genre" in song:
-                genres.add(re.sub(r'[\‎\‏\]', '',html.unescape(song['genre'])))
+                genres.add(re.sub(r'[\‎\‏\]', '',html.unescape(song['genre'])).lower())
             elif "album_genre" in song:
-                genres.add(re.sub(r'[\u200E\u200F]', '',html.unescape(song['album_genre'])))
+                genres.add(re.sub(r'[\u200E\u200F]', '',html.unescape(song['album_genre'])).lower())
             else:
                 genres.add("Undefined")
 
@@ -47,15 +47,6 @@ def load_json(file_path):
     except json.JSONDecodeError:
         print(f"Erreur lors du décodage du fichier JSON {file_path}.")
         return None
-
-# Chemin du dossier contenant les fichiers JSON
-##directory_path = 'public/json/song.json'
-
-# Traiter tous les fichiers JSON dans le dossier
-##process_json_files(directory_path)
-# Comparer les genres et afficher ceux manquants
-
-
 
 def extract_genres(subgenres):
     """Extrait tous les genres et sous-genres de manière récursive."""

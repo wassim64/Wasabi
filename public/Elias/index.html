@@ -3,192 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recherche de Genre Musical</title>
+    <title>Arbre des Genres Musicaux</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
-    <style>
-        .card {
-            background: white;
-            border-radius: 0.5rem;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
-            margin: 2rem auto;
-            max-width: 42rem;
-            padding: 1.5rem;
-        }
-        
-        .search-input {
-            border: 1px solid #e2e8f0;
-            border-radius: 0.375rem;
-            padding: 0.5rem 1rem;
-            width: 100%;
-            margin-right: 1rem;
-        }
-        
-        .search-input:focus {
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
-        }
-        
-        .search-button {
-            background-color: #3b82f6;
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 0.375rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .search-button:hover {
-            background-color: #2563eb;
-        }
-        
-        .search-button:disabled {
-            background-color: #93c5fd;
-            cursor: not-allowed;
-        }
-        
-        .alert {
-            background-color: #fee2e2;
-            border: 1px solid #f87171;
-            color: #dc2626;
-            padding: 1rem;
-            border-radius: 0.375rem;
-            margin: 1rem 0;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-gray-100 p-4">
-    <div class="card">
-        <div class="mb-6">
-            <h2 class="text-2xl font-bold">Recherche de Genre Musical</h2>
-        </div>
-        
-        <div class="flex gap-4 mb-4">
-            <input
-                type="text"
-                id="genreInput"
-                placeholder="Entrez un genre musical..."
-                class="search-input"
-            >
-            <button
-                id="searchButton"
-                class="search-button"
-            >
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                </svg>
-                <span id="buttonText">Rechercher</span>
-            </button>
-        </div>
-
-        <div id="error" class="alert" style="display: none;"></div>
-
-        <div id="results" class="mt-4" style="display: none;">
-            <h3 class="text-lg font-semibold mb-2">Résultats pour : <span id="searchedGenre"></span></h3>
-            
-            <div id="parentGenres" style="display: none;" class="mb-4">
-                <p class="font-medium">Genres parents :</p>
-                <ul class="list-disc ml-6" id="parentGenresList"></ul>
-            </div>
-            
-            <div id="subGenres" style="display: none;">
-                <p class="font-medium">Sous-genres :</p>
-                <ul class="list-disc ml-6" id="subGenresList"></ul>
+<body>
+    <div class="page-container bg-gray-100">
+        <div class="content-wrapper">
+            <div class="bg-white shadow p-6 min-h-screen">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold mb-4">Arbre des Genres Musicaux</h2>
+                    <div id="breadcrumb" class="breadcrumb"></div>
+                </div>
+                
+                <div id="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded" style="display: none;"></div>
+                
+                <div class="edge-container" id="edgeContainer"></div>
+                <div class="tree-container" id="treeContainer"></div>
             </div>
         </div>
     </div>
-
-    <script>
-        const genreInput = document.getElementById('genreInput');
-        const searchButton = document.getElementById('searchButton');
-        const buttonText = document.getElementById('buttonText');
-        const errorDiv = document.getElementById('error');
-        const resultsDiv = document.getElementById('results');
-        const searchedGenreSpan = document.getElementById('searchedGenre');
-        const parentGenresDiv = document.getElementById('parentGenres');
-        const subGenresDiv = document.getElementById('subGenres');
-        const parentGenresList = document.getElementById('parentGenresList');
-        const subGenresList = document.getElementById('subGenresList');
-
-        async function handleSearch() {
-            const genre = genreInput.value.trim();
-            
-            if (!genre) {
-                errorDiv.textContent = 'Veuillez entrer un genre musical';
-                errorDiv.style.display = 'block';
-                return;
-            }
-
-            // Reset UI
-            errorDiv.style.display = 'none';
-            resultsDiv.style.display = 'none';
-            searchButton.disabled = true;
-            buttonText.textContent = 'Recherche...';
-
-            try {
-                const response = await fetch('/api/search-genre', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ genre }),
-                });
-
-                if (!response.ok) {
-                    throw new Error('Erreur lors de la recherche du genre');
-                }
-
-                const data = await response.json();
-                displayResults(data);
-            } catch (err) {
-                errorDiv.textContent = err.message;
-                errorDiv.style.display = 'block';
-            } finally {
-                searchButton.disabled = false;
-                buttonText.textContent = 'Rechercher';
-            }
-        }
-
-        function displayResults(data) {
-            searchedGenreSpan.textContent = data.genre;
-            
-            // Parent genres
-            parentGenresList.innerHTML = '';
-            if (data.parent_genres && data.parent_genres.length > 0) {
-                data.parent_genres.forEach(parent => {
-                    const li = document.createElement('li');
-                    li.textContent = parent;
-                    parentGenresList.appendChild(li);
-                });
-                parentGenresDiv.style.display = 'block';
-            } else {
-                parentGenresDiv.style.display = 'none';
-            }
-            
-            // Subgenres
-            subGenresList.innerHTML = '';
-            if (data.subgenres && data.subgenres.length > 0) {
-                data.subgenres.forEach(subgenre => {
-                    const li = document.createElement('li');
-                    li.textContent = typeof subgenre === 'string' ? subgenre : subgenre.genre;
-                    subGenresList.appendChild(li);
-                });
-                subGenresDiv.style.display = 'block';
-            } else {
-                subGenresDiv.style.display = 'none';
-            }
-            
-            resultsDiv.style.display = 'block';
-        }
-
-        // Event listeners
-        searchButton.addEventListener('click', handleSearch);
-        genreInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                handleSearch();
-            }
-        });
-    </script>
+    <script src="style.js"></script>
 </body>
 </html>
