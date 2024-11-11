@@ -436,6 +436,48 @@ function updateUrlParameters() {
     window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
 }
 
+function getTop5Artists(yearData, genre) {
+    if (!yearData) return [];
+    const artists = new Map();
+    const displayMode = document.getElementById('displayMode').value;
+
+    // Parcourir les genres
+    Object.entries(yearData).forEach(([g, genreData]) => {
+        if (!genre || g === genre) {
+            // Accéder directement aux artistes du genre
+            Object.entries(genreData.artists).forEach(([artistId, artistData]) => {
+                if (!artists.has(artistId)) {
+                    artists.set(artistId, {
+                        name: artistData.name || 'Artiste inconnu',
+                        value: 0,
+                        count: 0,
+                        country: artistData.country || '',
+                        picture_small: artistData.picture_small || '',
+                        genre: g
+                    });
+                }
+                
+                const artist = artists.get(artistId);
+                artist.count += artistData.count;
+                artist.value += displayMode === 'count' 
+                    ? artistData.count 
+                    : artistData.rank_avg;
+            });
+        }
+    });
+
+    // Convertir et trier les résultats
+    return Array.from(artists.values())
+        .map(artist => ({
+            ...artist,
+            value: displayMode === 'count' 
+                ? artist.count 
+                : artist.value / artist.count
+        }))
+        .sort((a, b) => b.value - a.value)
+        .slice(0, 5);
+}
+
 // Ajouter ces fonctions
 function getTop5Albums(yearData, genre) {
     if (!yearData) return [];
@@ -453,7 +495,8 @@ function getTop5Albums(yearData, genre) {
                     value: displayMode === 'count' ? albumStats.count : albumStats.rank_avg,
                     country: albumStats.country,
                     id_artist: albumStats.id_artist,
-                    cover_small: albumStats.cover_small
+                    cover_small: albumStats.cover_small,
+                    genre: g
                 });
             });
         }
@@ -478,29 +521,56 @@ function getCountryFlag(countryCode) {
     return String.fromCodePoint(...codePoints);
 }
 
-// Modifier la fonction updateTop5Display
+// Modification de la fonction updateTop5Display
 function updateTop5Display(yearData, year, genre) {
-    const top5Container = document.getElementById('top5');
-    const top5Year = document.getElementById('top5Year');
-    const top5List = document.getElementById('top5List');
     const displayMode = document.getElementById('displayMode').value;
-
-    top5Year.textContent = displayMode === 'count' ? `avec le plus de sons en ${year}` : `avec le meilleur rank en ${year}`;
-    top5Container.style.display = 'block';
-
-    const top5 = getTop5Albums(yearData, genre);
     const valueLabel = displayMode === 'count' ? 'chansons' : 'popularité moyenne';
 
-    top5List.innerHTML = top5.map(({name, value, country, cover_small}, index) => `
+    // Fonction pour générer une couleur basée sur le genre
+    function getGenreColor(genre) {
+        // Utiliser la même échelle de couleur que le graphique
+        return d3.scaleOrdinal(d3.schemeCategory10)(genre);
+    }
+
+    // Mise à jour des albums
+    const top5 = getTop5Albums(yearData, genre);
+    document.getElementById('top5Year').textContent = 
+        displayMode === 'count' ? `avec le plus de sons en ${year}` : `avec le meilleur rank en ${year}`;
+    
+    document.getElementById('top5List').innerHTML = top5.map(({name, value, country, cover_small, genre}, index) => `
         <div class="top5-item">
-            <img src="${cover_small || 'default-album.jpg'}" alt="${name}" class="album-cover">
+            <span class="top5-rank">#${index + 1}</span>
+            <img src="${cover_small || 'default.jpg'}" alt="${name}" class="album-cover">
             <div class="album-info">
-                <span class="top5-rank">#${index + 1}</span>
-                <span class="album-name">${name}</span>
+                <div class="album-name">${name}</div>
                 <div class="album-details">
                     <span class="album-country">${getCountryFlag(country)}</span>
-                    <span class="album-value">${displayMode === 'count'
+                    <span class="album-genre" style="background-color: ${getGenreColor(genre)}">${genre}</span>
+                    <span class="top5-value">${displayMode === 'count'
                         ? Math.round(value)
+                        : Math.round(value).toLocaleString()} ${valueLabel}</span>
+                </div>
+            </div>
+        </div>
+    `).join('');
+
+    // Mise à jour des artistes
+    const top5Artists = getTop5Artists(yearData, genre);
+    document.getElementById('top5ArtistsYear').textContent = 
+        displayMode === 'count' ? `avec le plus de sons en ${year}` : `avec le meilleur rank en ${year}`;
+    
+    document.getElementById('top5ArtistsList').innerHTML = top5Artists.map(({name, value, country, picture_small, count, genre}, index) => `
+        <div class="top5-item">
+            <span class="top5-rank">#${index + 1}</span>
+            <img src="${picture_small || 'default.jpg'}" alt="${name}" class="album-cover">
+            <div class="album-info">
+                <div class="album-name">${name || 'Artiste inconnu'}</div>
+                <div class="album-details">
+                    <span class="album-country">${country}</span>
+                    <span class="album-genre" style="background-color: ${getGenreColor(genre)}">${genre}</span>
+                    <span class="album-count">${count} titres</span>
+                    <span class="top5-value">${displayMode === 'count' 
+                        ? Math.round(value) 
                         : Math.round(value).toLocaleString()} ${valueLabel}</span>
                 </div>
             </div>
@@ -512,3 +582,18 @@ function updateTop5Display(yearData, year, genre) {
 initializeSVG();
 loadData();
 
+function goBack() {
+    // Récupérer les paramètres actuels
+    const startYear = document.getElementById('startYear').value;
+    const endYear = document.getElementById('endYear').value;
+    const genre = document.getElementById('genreSelect').value;
+
+    // Construire l'URL avec les paramètres
+    const params = new URLSearchParams();
+    if (startYear) params.set('start', startYear);
+    if (endYear) params.set('end', endYear);
+    if (genre) params.set('genre', genre);
+
+    // Rediriger vers la page de Damien avec les paramètres
+    window.location.href = `/public/damien/index.html?${params.toString()}`;
+}
