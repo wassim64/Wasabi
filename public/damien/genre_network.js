@@ -3,6 +3,8 @@ let originalData;
 let currentData;
 let simulation;
 let transform = d3.zoomIdentity;
+let availableYears = new Set();
+let availableCountries = new Set();
 
 // Dimensions et configuration
 const width = 1200;
@@ -41,6 +43,12 @@ function loadData() {
         originalData = data;
         currentData = JSON.parse(JSON.stringify(data));
         
+        // Collecter les années et pays disponibles
+        data.nodes.forEach(node => {
+            Object.keys(node.years).forEach(year => availableYears.add(parseInt(year)));
+            Object.keys(node.countries).forEach(country => availableCountries.add(country));
+        });
+
         // Initialiser le menu déroulant des genres
         const genreSelect = document.getElementById('genreSelect');
         const genres = data.nodes.map(n => n.id).sort();
@@ -50,9 +58,29 @@ function loadData() {
             genreSelect.add(option);
         });
 
-        // Initialiser la visualisation
+        // Initialiser les sélecteurs
+        initializeFilters();
         updateVisualization();
         setupEventListeners();
+    });
+}
+
+// Fonction pour initialiser les filtres
+function initializeFilters() {
+    // Années
+    const yearStart = document.getElementById('yearStart');
+    const yearEnd = document.getElementById('yearEnd');
+    yearStart.min = Math.min(...availableYears);
+    yearStart.max = Math.max(...availableYears);
+    yearEnd.min = yearStart.min;
+    yearEnd.max = yearStart.max;
+
+    // Pays
+    const countrySelect = document.getElementById('countrySelect');
+    Array.from(availableCountries).sort().forEach(country => {
+        const option = document.createElement('option');
+        option.value = option.text = country;
+        countrySelect.add(option);
     });
 }
 
@@ -336,25 +364,113 @@ function setupEventListeners() {
             .duration(750)
             .call(zoom.transform, d3.zoomIdentity);
     });
+
+    document.getElementById('yearStart').addEventListener('change', function() {
+        filterByYearRange();
+    });
+
+    document.getElementById('yearEnd').addEventListener('change', function() {
+        filterByYearRange();
+    });
+
+    function filterByYearRange() {
+        const yearStart = parseInt(document.getElementById('yearStart').value);
+        const yearEnd = parseInt(document.getElementById('yearEnd').value);
+        
+        // Filtrer les nœuds en fonction des années
+        currentData.nodes = originalData.nodes.map(node => {
+            const filteredNode = {...node};
+            let newSongCount = 0;
+            
+            // Calculer le nouveau songCount pour la période
+            Object.entries(node.years).forEach(([year, count]) => {
+                const yearNum = parseInt(year);
+                if (yearNum >= yearStart && yearNum <= yearEnd) {
+                    newSongCount += count;
+                }
+            });
+            
+            filteredNode.songCount = newSongCount;
+            return filteredNode;
+        }).filter(node => node.songCount > 0); // Garder uniquement les nœuds avec des chansons
+    
+        // Créer un Set des IDs des nœuds actifs
+        const activeNodeIds = new Set(currentData.nodes.map(n => n.id));
+    
+        // Filtrer les liens pour ne garder que ceux entre les nœuds actifs
+        currentData.links = originalData.links.filter(link => {
+            return activeNodeIds.has(link.source.id || link.source) && 
+                   activeNodeIds.has(link.target.id || link.target);
+        });
+    
+        // Réinitialiser la simulation avec les nouvelles données
+        simulation.nodes(currentData.nodes);
+        simulation.force('link').links(currentData.links);
+        
+        // Redémarrer la simulation en douceur
+        simulation.alpha(0.3).restart();
+        
+        updateVisualization();
+    }
 }
 
 // Fonctions pour le drag & drop
-function dragstarted(event) {
-    if (!event.active) simulation.alphaTarget(0.3).restart();
-    event.subject.fx = event.subject.x;
-    event.subject.fy = event.subject.y;
+function dragstarted(d) {
+    if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+    d.fx = d.x;
+    d.fy = d.y;
 }
 
-function dragged(event) {
-    event.subject.fx = event.x;
-    event.subject.fy = event.y;
+function dragged(d) {
+    d.fx = d3.event.x;
+    d.fy = d3.event.y;
 }
 
-function dragended(event) {
-    if (!event.active) simulation.alphaTarget(0);
-    event.subject.fx = null;
-    event.subject.fy = null;
+function dragended(d) {
+    if (!d3.event.active) simulation.alphaTarget(0);
+    d.fx = null;
+    d.fy = null;
 }
+
+// Modifier la gestion des clics sur les nœuds
+function handleNodeClick(event, d) {
+    const contextMenu = document.getElementById('nodeContextMenu');
+    event.preventDefault();
+    
+    // Positionner et afficher le menu
+    contextMenu.style.display = 'block';
+    contextMenu.style.left = `${event.pageX}px`;
+    contextMenu.style.top = `${event.pageY}px`;
+    
+    // Gérer les actions du menu
+    document.getElementById('focusNode').onclick = () => {
+        document.getElementById('genreSelect').value = d.id;
+        filterByGenre(d.id);
+        contextMenu.style.display = 'none';
+    };
+
+    document.getElementById('redirectTimeline').onclick = () => {
+        const yearStart = document.getElementById('yearStart').value;
+        const yearEnd = document.getElementById('yearEnd').value;
+        window.location.href = `/Wasabi/public/timeline.html?genre=${d.id}&start=${yearStart}&end=${yearEnd}`;
+        contextMenu.style.display = 'none';
+    };
+
+    document.getElementById('redirectNetwork').onclick = () => {
+        const yearStart = document.getElementById('yearStart').value;
+        const yearEnd = document.getElementById('yearEnd').value;
+        window.location.href = `/Wasabi/public/network.html?genre=${d.id}&start=${yearStart}&end=${yearEnd}`;
+        contextMenu.style.display = 'none';
+    };
+}
+
+// Ajouter un gestionnaire pour fermer le menu contextuel
+document.addEventListener('click', function(event) {
+    const contextMenu = document.getElementById('nodeContextMenu');
+    if (!contextMenu.contains(event.target)) {
+        contextMenu.style.display = 'none';
+    }
+});
 
 // Appeler loadData pour initialiser
 loadData();
