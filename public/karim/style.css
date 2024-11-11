@@ -146,11 +146,11 @@ button:hover {
     margin-bottom: 12px;
     margin-left: 25px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: all 0.3s;
 }
 
 .top5-item:hover {
-    transform: translateY(-2px);
+    background: rgb(238, 238, 238);
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
