@@ -72,10 +72,6 @@ function populateSelectors() {
     // Remplir les années
     document.getElementById('startYear').value = years[0];
     document.getElementById('endYear').value = years[years.length - 1];
-
-    // Debug
-    console.log("Années disponibles:", years);
-    console.log("Genres disponibles:", Array.from(genres));
 }
 
 // Mettre à jour le graphique
@@ -124,10 +120,6 @@ function updateChart() {
         .x(d => x(d.data.year))
         .y0(d => y(d[0]))
         .y1(d => y(d[1]));
-
-    // Debug des données empilées
-    const stackedData = stack(filteredData);
-    console.log("Données empilées:", stackedData);
 
     // Ajouter les axes
     // Axe X
@@ -184,6 +176,22 @@ function updateChart() {
         genreTotals[genre] = d3.sum(filteredData, d => d[genre] || 0);
     });
 
+
+    function highlight(d) {
+        // Réduire l'opacité de toutes les aires
+        layers.selectAll('.area')
+            .style('opacity', 0.2);
+        // Augmenter l'opacité de l'aire du genre sélectionné
+        layers.selectAll('.area')
+            .filter(a => a.key === d)
+            .style('opacity', 1);
+    }
+
+    function noHighlight() {
+        layers.selectAll('.area')
+            .style('opacity', 1);
+    }
+
     // Supprimer l'ancienne légende
     svg.selectAll('.legend-container').remove();
 
@@ -212,13 +220,18 @@ function updateChart() {
         .attr('class', 'legend-text')
         .attr('x', 20)
         .attr('y', 9)
+        .style("fill", function(d) {
+            return color(d);
+        })
         .text(d => {
             const total = displayMode === 'count'
                 ? Math.round(genreTotals[d]).toLocaleString()
                 : Math.round(genreTotals[d] / filteredData.length).toLocaleString();
             const label = displayMode === 'count' ? 'sons' : 'score moy.';
             return `${d} (${total} ${label})`;
-        });
+        })
+        .on("mouseover", highlight)
+        .on("mouseleave", noHighlight);
 
     // Ajouter un fond blanc semi-transparent à la légende
     legendContainer.insert('rect', ':first-child')
@@ -231,95 +244,112 @@ function updateChart() {
     // Ajouter l'interaction pour le hover
     const bisectDate = d3.bisector(d => d.year).left;
 
+    // Ajouter une ligne verticale pour le hover
+    const hoverLine = g.append('line')
+        .attr('class', 'hover-line')
+        .attr('y1', 0)
+        .attr('y2', height)
+        .style('opacity', 0);
+
     const overlay = g.append('rect')
         .attr('class', 'overlay')
         .attr('width', width)
         .attr('height', height)
-        .style('opacity', 0);
+        .style('fill', 'none')
+        .style('pointer-events', 'all');
 
-    overlay
-        .on('mousemove', function() {
-            const [mouseX, mouseY] = d3.mouse(this);
-            const x0 = x.invert(mouseX);
-            const i = bisectDate(filteredData, x0, 1);
-            const d0 = filteredData[i - 1];
-            const d1 = filteredData[i];
-            const d = x0 - d0.year > d1.year - x0 ? d1 : d0;
+    // Gérer les interactions de l'overlay
+    overlay.on('mousemove', function() {
+        const [mouseX, mouseY] = d3.mouse(this);
+        const x0 = x.invert(mouseX);
+        const i = bisectDate(filteredData, x0, 1);
+        const d0 = filteredData[i - 1];
+        const d1 = filteredData[i];
+        const d = x0 - d0.year > d1.year - x0 ? d1 : d0;
 
-            // Calculer les pourcentages
-            const total = d.total;
-            const percentages = {};
-            Object.entries(d).forEach(([key, value]) => {
-                if (key !== 'year' && key !== 'total') {
-                    percentages[key] = ((value / total) * 100).toFixed(1);
-                }
+        // Mettre à jour la position de la ligne de hover
+        hoverLine
+            .attr('x1', mouseX)
+            .attr('x2', mouseX)
+            .style('opacity', 1);
+
+        // Calculer les pourcentages
+        const total = d.total;
+        const percentages = {};
+        Object.entries(d).forEach(([key, value]) => {
+            if (key !== 'year' && key !== 'total') {
+                percentages[key] = ((value / total) * 100).toFixed(1);
+            }
+        });
+
+        // Limiter le nombre de genres affichés 
+        const maxGenres = 10;
+
+        // Créer le contenu du tooltip
+        let tooltipContent = `<strong>Année ${d.year.getFullYear()}</strong>`;
+        const displayMode = document.getElementById('displayMode').value;
+
+        Object.entries(percentages)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, maxGenres)
+            .forEach(([genre, percentage]) => {
+                const value = displayMode === 'count'
+                    ? d[genre]
+                    : Math.round(d[genre]);
+                const valueText = displayMode === 'count'
+                    ? `${value} sons (${percentage}%)`
+                    : `Score: ${value} (${percentage}%)`;
+
+                tooltipContent += `
+                    <div class="tooltip-row">
+                        <span class="tooltip-genre">${genre}</span>
+                        <span class="tooltip-value">${valueText}</span>
+                    </div>`;
             });
 
-            // Créer le contenu du tooltip
-            let tooltipContent = `<strong>Année ${d.year.getFullYear()}</strong>`;
-            const displayMode = document.getElementById('displayMode').value;
+        // Ajouter une indication s'il y a plus de genres
+        const totalGenres = Object.keys(percentages).length;
+        if (totalGenres > maxGenres) {
+            tooltipContent += `
+                <div class="tooltip-row" style="margin-top: 8px; font-style: italic; color: #999;">
+                    Et ${totalGenres - maxGenres} autres genres...
+                </div>`;
+        }
 
-            Object.entries(percentages)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 20)
-                .forEach(([genre, percentage]) => {
-                    const value = displayMode === 'count'
-                        ? d[genre]
-                        : Math.round(d[genre]);
-                    const valueText = displayMode === 'count'
-                        ? `${value} sons (${percentage}%)`
-                        : `Score: ${value} (${percentage}%)`;
+        // Calculer la position du tooltip
+        const tooltipWidth = 250; // Largeur approximative du tooltip
+        const tooltipHeight = (Object.keys(percentages).length * 25) + 40; // Hauteur approximative
 
-                    tooltipContent += `
-                        <div class="tooltip-row">
-                            <span class="tooltip-genre">${genre}</span>
-                            <span class="tooltip-value">${valueText}</span>
-                        </div>`;
-                });
+        // Position par défaut (à droite du curseur)
+        let tooltipX = mouseX + margin.left + 20;
+        let tooltipY = mouseY + margin.top - (tooltipHeight / 2);
 
-            // Ajouter une indication s'il y a plus de genres
-            const totalGenres = Object.keys(percentages).length;
-            if (totalGenres > 20) {
-                tooltipContent += `
-                    <div class="tooltip-row" style="margin-top: 8px; font-style: italic; color: #999;">
-                        Et ${totalGenres - 20} autres genres...
-                    </div>`;
-            }
+        // Ajuster si le tooltip dépasse à droite
+        if (tooltipX + tooltipWidth > window.innerWidth) {
+            tooltipX = mouseX + margin.left - tooltipWidth - 20;
+        }
 
-            // Calculer la position du tooltip
-            const tooltipWidth = 250; // Largeur approximative du tooltip
-            const tooltipHeight = (Object.keys(percentages).length * 25) + 40; // Hauteur approximative
+        // Ajuster si le tooltip dépasse en haut ou en bas
+        if (tooltipY < 0) {
+            tooltipY = 10;
+        } else if (tooltipY + tooltipHeight > window.innerHeight) {
+            tooltipY = window.innerHeight - tooltipHeight - 10;
+        }
 
-            // Position par défaut (à droite du curseur)
-            let tooltipX = mouseX + margin.left + 20;
-            let tooltipY = mouseY + margin.top - (tooltipHeight / 2);
-
-            // Ajuster si le tooltip dépasse à droite
-            if (tooltipX + tooltipWidth > window.innerWidth) {
-                tooltipX = mouseX + margin.left - tooltipWidth - 20;
-            }
-
-            // Ajuster si le tooltip dépasse en haut ou en bas
-            if (tooltipY < 0) {
-                tooltipY = 10;
-            } else if (tooltipY + tooltipHeight > window.innerHeight) {
-                tooltipY = window.innerHeight - tooltipHeight - 10;
-            }
-
-            // Positionner et afficher le tooltip
-            tooltip.transition()
-                .duration(200)
-                .style("opacity", 1);
-            tooltip.html(tooltipContent)
-                .style("left", `${tooltipX}px`)
-                .style("top", `${tooltipY}px`);
-        })
-        .on('mouseout', function() {
-            tooltip.transition()
-                .duration(500)
-                .style("opacity", 0);
-        });
+        // Positionner et afficher le tooltip
+        tooltip.transition()
+            .duration(200)
+            .style("opacity", 1);
+        tooltip.html(tooltipContent)
+            .style("left", `${tooltipX}px`)
+            .style("top", `${tooltipY}px`);
+    })
+    .on('mouseout', function() {
+        hoverLine.style('opacity', 0);
+        tooltip.style('opacity', 0);
+    });
 }
+
 
 // Traiter les données selon les filtres
 function processData(startYear, endYear, selectedGenre) {

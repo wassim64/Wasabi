@@ -78,7 +78,7 @@ button:hover {
 
 .area {
     opacity: 0.7;
-    transition: opacity 0.2s;
+    transition: opacity 0.2s, stroke-width 0.2s;
 }
 
 .area:hover {
@@ -230,11 +230,16 @@ button:hover {
     align-items: center;
     padding: 4px;
     margin-bottom: 8px;
-    transition: background-color 0.2s;
+    transition: background-color 0.2s, font-weight 0.2s;
+    cursor: pointer;
 }
 
 .legend-item:hover {
     background-color: #f5f5f5;
+}
+
+.legend-item:hover .legend-text {
+    font-weight: bold;
 }
 
 .legend-color {
@@ -253,4 +258,29 @@ button:hover {
     margin-left: 8px;
     color: #666;
     font-size: 11px;
+}
+
+.hover-line {
+    stroke: #666;
+    stroke-width: 1px;
+    pointer-events: none;
+}
+
+.brush .selection {
+    fill: rgba(100, 100, 100, 0.2);
+    stroke: #666;
+    stroke-width: 1px;
+}
+
+.interaction-group {
+    pointer-events: all;
+}
+
+.overlay {
+    cursor: crosshair;
+}
+
+.legend-item {
+    cursor: pointer;
+    transition: font-weight 0.2s;
 }

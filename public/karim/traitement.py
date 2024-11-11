@@ -17,7 +17,7 @@ def process_genre_evolution():
     }))
     
     # Nombre de chansons à traiter
-    songs_limit = 1000000  # Réduit à 100k pour plus de rapidité
+    songs_limit = 1000000
     print(f"Traitement de {songs_limit} chansons...")
     
     # Traiter les chansons avec barre de progression
@@ -50,9 +50,16 @@ def process_genre_evolution():
             except (ValueError, TypeError):
                 continue
     
+    # Filtrer les années finales entre 1950 et 2026 (pour éviter les années bug)
+    filtered_evolution = {
+        year: data 
+        for year, data in genre_evolution.items() 
+        if 1950 <= int(year) <= 2026
+    }
+    
     print("Sauvegarde des données...")
     with open(output_path, 'w', encoding='utf-8') as f:
-        json.dump(dict(genre_evolution), f, ensure_ascii=False, indent=2)
+        json.dump(filtered_evolution, f, ensure_ascii=False, indent=2)
     
     print("Traitement terminé!")
 
