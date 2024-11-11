@@ -28,6 +28,24 @@ const linkTooltip = d3.select('body')
     .attr('class', 'link-tooltip')
     .style('opacity', 0);
 
+// Ajouter au début du fichier, après les déclarations de variables
+function getUrlParameters() {
+    const params = new URLSearchParams(window.location.search);
+    return {
+        genre: params.get('genre'),
+        start: params.get('start'),
+        end: params.get('end')
+    };
+}
+
+function updateUrlParameters(genre, start, end) {
+    const url = new URL(window.location);
+    if (genre) url.searchParams.set('genre', genre);
+    if (start) url.searchParams.set('start', start);
+    if (end) url.searchParams.set('end', end);
+    window.history.pushState({}, '', url);
+}
+
 // Fonction pour charger et initialiser les données
 function loadData() {
     d3.json('genre_network.json').then(data => {
@@ -45,8 +63,20 @@ function loadData() {
             option.value = option.text = genre;
             genreSelect.add(option);
         });
+        
         initializeFilters();
-        updateVisualization();
+        
+        // Appliquer les paramètres de l'URL si présents
+        const params = getUrlParameters();
+        if (params.start) document.getElementById('yearStart').value = params.start;
+        if (params.end) document.getElementById('yearEnd').value = params.end;
+        if (params.genre) {
+            document.getElementById('genreSelect').value = params.genre;
+            filterByGenre(params.genre);
+        } else {
+            updateVisualization();
+        }
+        
         setupEventListeners();
     });
 }
@@ -314,6 +344,9 @@ function filterByGenre(centralGenre) {
 // Configuration des écouteurs d'événements
 function setupEventListeners() {
     document.getElementById('genreSelect').addEventListener('change', function(e) {
+        const yearStart = document.getElementById('yearStart').value;
+        const yearEnd = document.getElementById('yearEnd').value;
+        updateUrlParameters(e.target.value, yearStart, yearEnd);
         filterByGenre(e.target.value);
     });
     document.getElementById('depthRange').addEventListener('input', function(e) {
@@ -338,6 +371,8 @@ function setupEventListeners() {
         document.getElementById('connectionsValue').textContent = 10;
         document.getElementById('minSongs').value = 0;
         document.getElementById('minArtists').value = 0;
+        // Réinitialiser l'URL
+        window.history.pushState({}, '', window.location.pathname);
         currentData = JSON.parse(JSON.stringify(originalData));
         updateVisualization();
     });
@@ -349,10 +384,16 @@ function setupEventListeners() {
     });
 
     document.getElementById('yearStart').addEventListener('change', function() {
+        const genre = document.getElementById('genreSelect').value;
+        const yearEnd = document.getElementById('yearEnd').value;
+        updateUrlParameters(genre, this.value, yearEnd);
         filterByYearRange();
     });
 
     document.getElementById('yearEnd').addEventListener('change', function() {
+        const genre = document.getElementById('genreSelect').value;
+        const yearStart = document.getElementById('yearStart').value;
+        updateUrlParameters(genre, yearStart, this.value);
         filterByYearRange();
     });
 
