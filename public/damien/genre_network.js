@@ -196,7 +196,7 @@ function updateVisualization() {
             .on('drag', dragged)
             .on('end', dragended));
 
-    // Ajouter les cercles
+    // Ajouter les cercles aux nœuds
     node.append('circle')
         .attr('r', d => nodeScale(d.songCount))
         .attr('fill', d => d3.schemeCategory10[d.id.length % 10])
@@ -234,10 +234,46 @@ function updateVisualization() {
             .style('opacity', 0);
     })
     .on('click', function(d) {
-        const genreId = d.id;
-        document.getElementById('genreSelect').value = genreId;
-        filterByGenre(genreId);
-        d3.event.stopPropagation(); // Empêcher la propagation de l'événement
+        d3.event.preventDefault();
+        d3.event.stopPropagation();
+        
+        const contextMenu = document.getElementById('nodeContextMenu');
+        
+        // Positionner et afficher le menu
+        contextMenu.style.display = 'block';
+        contextMenu.style.left = `${d3.event.pageX}px`;
+        contextMenu.style.top = `${d3.event.pageY}px`;
+        
+        // Gérer les actions du menu
+        document.getElementById('focusNode').onclick = () => {
+            document.getElementById('genreSelect').value = d.id;
+            filterByGenre(d.id);
+            contextMenu.style.display = 'none';
+        };
+
+        document.getElementById('redirectTimeline').onclick = () => {
+            const yearStart = document.getElementById('yearStart').value;
+            const yearEnd = document.getElementById('yearEnd').value;
+            window.location.href = `/Wasabi/public/timeline.html?genre=${d.id}&start=${yearStart}&end=${yearEnd}`;
+        };
+
+        document.getElementById('redirectNetwork').onclick = () => {
+            const yearStart = document.getElementById('yearStart').value;
+            const yearEnd = document.getElementById('yearEnd').value;
+            window.location.href = `/Wasabi/public/network.html?genre=${d.id}&start=${yearStart}&end=${yearEnd}`;
+        };
+
+        document.getElementById('redirectBubble').onclick = () => {
+            const yearStart = document.getElementById('yearStart').value;
+            const yearEnd = document.getElementById('yearEnd').value;
+            window.location.href = `/Wasabi/public/bubble.html?genre=${d.id}&start=${yearStart}&end=${yearEnd}`;
+        };
+
+        document.getElementById('redirectWordcloud').onclick = () => {
+            const yearStart = document.getElementById('yearStart').value;
+            const yearEnd = document.getElementById('yearEnd').value;
+            window.location.href = `/Wasabi/public/wordcloud.html?genre=${d.id}&start=${yearStart}&end=${yearEnd}`;
+        };
     });
 
     // Mise à jour de la simulation
@@ -430,38 +466,6 @@ function dragended(d) {
     if (!d3.event.active) simulation.alphaTarget(0);
     d.fx = null;
     d.fy = null;
-}
-
-// Modifier la gestion des clics sur les nœuds
-function handleNodeClick(event, d) {
-    const contextMenu = document.getElementById('nodeContextMenu');
-    event.preventDefault();
-    
-    // Positionner et afficher le menu
-    contextMenu.style.display = 'block';
-    contextMenu.style.left = `${event.pageX}px`;
-    contextMenu.style.top = `${event.pageY}px`;
-    
-    // Gérer les actions du menu
-    document.getElementById('focusNode').onclick = () => {
-        document.getElementById('genreSelect').value = d.id;
-        filterByGenre(d.id);
-        contextMenu.style.display = 'none';
-    };
-
-    document.getElementById('redirectTimeline').onclick = () => {
-        const yearStart = document.getElementById('yearStart').value;
-        const yearEnd = document.getElementById('yearEnd').value;
-        window.location.href = `/Wasabi/public/timeline.html?genre=${d.id}&start=${yearStart}&end=${yearEnd}`;
-        contextMenu.style.display = 'none';
-    };
-
-    document.getElementById('redirectNetwork').onclick = () => {
-        const yearStart = document.getElementById('yearStart').value;
-        const yearEnd = document.getElementById('yearEnd').value;
-        window.location.href = `/Wasabi/public/network.html?genre=${d.id}&start=${yearStart}&end=${yearEnd}`;
-        contextMenu.style.display = 'none';
-    };
 }
 
 // Ajouter un gestionnaire pour fermer le menu contextuel
