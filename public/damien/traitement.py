@@ -1,121 +1,139 @@
 import json
 import ijson
+import os
 from collections import defaultdict
 from itertools import combinations
+from tqdm import tqdm  # Pour la barre de progression
+
+def clean_genre_name(genre):
+    # Nettoyer les caractères HTML
+    cleaned = genre.replace('&#x200e;', '').replace('&#x200f;', '')
+    # Si après nettoyage le genre est différent, on peut ajouter un suffixe pour le différencier
+    if cleaned != genre:
+        return f"{cleaned} (variant)"
+    return cleaned
 
 def process_genre_connections():
-    # Chemins des fichiers
-    songs_path = 'json/song.json'
-    artists_path = 'json/artist-without-members.json'
-    cache_path = 'damien/cache'
+    # Configuration des chemins
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    json_dir = os.path.join(os.path.expanduser('~'), 'OneDrive', 'Documents', 'Dev', 'Wasabi', 'public', 'json')
+    songs_path = os.path.join(json_dir, 'song.json')
+    artists_path = os.path.join(json_dir, 'artist-without-members.json')
+    cache_path = os.path.join(base_dir, 'cache')
+
+    # Afficher les chemins pour debug
+    print("Chemins des fichiers :")
+    print(f"Base dir: {base_dir}")
+    print(f"JSON dir: {json_dir}")
+    print(f"Songs path: {songs_path}")
+    print(f"Artists path: {artists_path}")
     
-    # Vérifier si les données en cache existent
+    # Vérifier l'existence des dossiers et fichiers
+    print("\nVérification des chemins :")
+    print(f"JSON dir exists: {os.path.exists(json_dir)}")
+    print(f"Songs file exists: {os.path.exists(songs_path)}")
+    print(f"Artists file exists: {os.path.exists(artists_path)}")
+
+    # Vérification initiale
+    if not os.path.exists(songs_path) or not os.path.exists(artists_path):
+        raise FileNotFoundError(f"Fichiers JSON introuvables\nCherché dans : {json_dir}")
+
     try:
-        with open(f'{cache_path}_artist_genres.json', 'r', encoding='utf-8') as f:
-            artist_genres = defaultdict(set, {k: set(v) for k, v in json.load(f).items()})
-        with open(f'{cache_path}_genre_details.json', 'r', encoding='utf-8') as f:
-            genre_details = defaultdict(lambda: {'song_count': 0, 'artist_count': 0, 'avg_duration': 0, 'total_duration': 0}, 
-                                     json.load(f))
-        with open(f'{cache_path}_genre_connections.json', 'r', encoding='utf-8') as f:
-            genre_connections = defaultdict(lambda: defaultdict(int), json.load(f))
-        print("Données chargées depuis le cache")
-        
-    except FileNotFoundError:
-        print("Traitement des fichiers originaux...")
-        # Structures de données
-        artist_genres = defaultdict(set)  # {artist_id: set(genres)}
-        genre_connections = defaultdict(lambda: defaultdict(int))  # {genre1: {genre2: count}}
+        # Initialisation des structures de données
+        artist_genres = defaultdict(set)
+        genre_connections = defaultdict(lambda: defaultdict(int))
         genre_details = defaultdict(lambda: {
             'song_count': 0,
             'artist_count': 0,
             'avg_duration': 0,
-            'total_duration': 0
+            'total_duration': 0,
+            'years': defaultdict(int),
+            'countries': defaultdict(int)
         })
 
-        # Charger les artistes et leurs genres principaux
+        # Traitement des artistes
+        print("Traitement des artistes...")
         with open(artists_path, 'r', encoding='utf-8') as file:
-            for artist in ijson.items(file, 'item'):
+            for artist in tqdm(ijson.items(file, 'item'), desc="Artistes"):
                 artist_id = artist.get('id_artist_deezer')
                 if artist_id:
-                    # Ajouter le genre principal de l'artiste
-                    main_genre = artist.get('main_genre', '').lower()
+                    main_genre = clean_genre_name(artist.get('main_genre', '').lower())
                     if main_genre:
                         artist_genres[artist_id].add(main_genre)
 
-        # Traiter les chansons
+        # Traitement des chansons
+        print("Traitement des chansons...")
         with open(songs_path, 'r', encoding='utf-8') as file:
-            for song in ijson.items(file, 'item'):
+            for song in tqdm(ijson.items(file, 'item'), desc="Chansons"):
                 artist_id = song.get('id_artist_deezer')
                 album_genre = song.get('album_genre', '').lower()
                 duration = int(song.get('duration', 0))
                 
+                # Extraire l'année de publicationDate
+                publication_date = song.get('publicationDate', '')
+                year = publication_date[:4] if publication_date else None  # Prend les 4 premiers caractères (l'année)
+                
+                country = song.get('country', '').lower()
+                
                 if artist_id and album_genre:
-                    # Ajouter le genre de l'album aux genres de l'artiste
+                    album_genre = clean_genre_name(album_genre)
                     artist_genres[artist_id].add(album_genre)
-                    
-                    # Mettre à jour les statistiques du genre
                     genre_details[album_genre]['song_count'] += 1
                     genre_details[album_genre]['total_duration'] += duration
                     
-        # Calculer les connexions entre genres
-        for artist_id, genres in artist_genres.items():
-            # Mettre à jour le nombre d'artistes par genre
+                    # Ajouter l'année si elle existe
+                    if year and year.isdigit():  # Vérifie que c'est bien un nombre
+                        genre_details[album_genre]['years'][int(year)] += 1
+                    
+                    if country:
+                        genre_details[album_genre]['countries'][country] += 1
+
+        # Calcul des connexions
+        print("Calcul des connexions entre genres...")
+        for artist_id, genres in tqdm(artist_genres.items(), desc="Connexions"):
             for genre in genres:
                 genre_details[genre]['artist_count'] += 1
-            
-            # Créer des connexions entre tous les genres d'un artiste
             for genre1, genre2 in combinations(genres, 2):
                 genre_connections[genre1][genre2] += 1
                 genre_connections[genre2][genre1] += 1
 
-        # Calculer les moyennes de durée
-        for genre in genre_details:
-            if genre_details[genre]['song_count'] > 0:
-                genre_details[genre]['avg_duration'] = (
-                    genre_details[genre]['total_duration'] / 
-                    genre_details[genre]['song_count']
-                )
+        # Préparation des données pour D3.js
+        print("Préparation des données finales...")
+        nodes = [
+            {
+                'id': genre,
+                'songCount': details['song_count'],
+                'artistCount': details['artist_count'],
+                'avgDuration': details['avg_duration'],
+                'years': details['years'],
+                'countries': details['countries']
+            }
+            for genre, details in genre_details.items()
+            if details['song_count'] > 0
+        ]
 
-        # Sauvegarder les données intermédiaires
-        with open(f'{cache_path}_artist_genres.json', 'w', encoding='utf-8') as f:
-            json.dump({k: list(v) for k, v in artist_genres.items()}, f)
-        with open(f'{cache_path}_genre_details.json', 'w', encoding='utf-8') as f:
-            json.dump(dict(genre_details), f)
-        with open(f'{cache_path}_genre_connections.json', 'w', encoding='utf-8') as f:
-            json.dump(dict(genre_connections), f)
+        edges = [
+            {
+                'source': genre1,
+                'target': genre2,
+                'weight': weight
+            }
+            for genre1 in genre_connections
+            for genre2, weight in genre_connections[genre1].items()
+            if weight > 0
+        ]
 
-    # Préparer les données pour D3.js
-    nodes = [
-        {
-            'id': genre,
-            'songCount': details['song_count'],
-            'artistCount': details['artist_count'],
-            'avgDuration': details['avg_duration']
-        }
-        for genre, details in genre_details.items()
-        if details['song_count'] > 0  # Filtrer les genres sans chansons
-    ]
+        # Sauvegarde des résultats
+        network_data = {'nodes': nodes, 'links': edges}
+        output_path = os.path.join(base_dir, 'genre_network.json')
+        with open(output_path, 'w', encoding='utf-8') as f:
+            json.dump(network_data, f, ensure_ascii=False, indent=2)
 
-    edges = []
-    for genre1 in genre_connections:
-        for genre2, weight in genre_connections[genre1].items():
-            if weight > 0:  # Ne garder que les connexions significatives
-                edges.append({
-                    'source': genre1,
-                    'target': genre2,
-                    'weight': weight
-                })
+        print(f"Traitement terminé avec succès!")
+        print(f"Nœuds: {len(nodes)}, Liens: {len(edges)}")
 
-    # Sauvegarder le résultat
-    network_data = {
-        'nodes': nodes,
-        'links': edges
-    }
-    
-    # Modification du chemin de sauvegarde pour genre_network.json
-    output_path = 'damien/genre_network.json'
-    with open(output_path, 'w', encoding='utf-8') as f:
-        json.dump(network_data, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        print(f"Erreur lors du traitement : {str(e)}")
 
 if __name__ == '__main__':
     process_genre_connections()

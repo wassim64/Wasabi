@@ -1,0 +1,256 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f5f5f5;
+}
+
+.container {
+    max-width: 1500px;
+    margin: 0 auto;
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 30px;
+}
+
+.controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 30px;
+    padding: 15px;
+    background: #f8f8f8;
+    border-radius: 6px;
+}
+
+.control-group {
+    flex: 1;
+    min-width: 200px;
+}
+
+.control-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #666;
+}
+
+.time-range {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+input[type="number"],
+select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+button {
+    padding: 8px 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+#chart {
+    width: 100%;
+    height: 500px;
+    margin-top: 20px;
+}
+
+.area {
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.area:hover {
+    opacity: 0.9;
+}
+
+.axis text {
+    font-size: 12px;
+}
+
+.axis-label {
+    font-size: 14px;
+}
+
+.legend {
+    font-size: 12px;
+}
+
+.description {
+    margin-top: 40px;
+    padding: 20px;
+    background: #f8f8f8;
+    border-radius: 6px;
+    line-height: 1.6;
+}
+
+.description h3 {
+    color: #333;
+    margin-top: 0;
+}
+
+.description ul {
+    padding-left: 20px;
+}
+
+.description li {
+    margin-bottom: 10px;
+}
+
+.top10-container {
+    margin-top: 20px;
+    padding: 15px;
+    background: #f8f8f8;
+    border-radius: 6px;
+    display: none;  /* Caché par défaut */
+}
+
+.top10-container h3 {
+    margin-top: 0;
+    color: #333;
+}
+
+.top10-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.top10-item {
+    display: flex;
+    align-items: center;
+    padding: 5px;
+    background: white;
+    border-radius: 4px;
+}
+
+.top10-rank {
+    font-weight: bold;
+    margin-right: 10px;
+    color: #4CAF50;
+    min-width: 25px;
+}
+
+.top10-value {
+    margin-left: auto;
+    color: #666;
+}
+
+.tooltip {
+    position: absolute;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    pointer-events: none;
+    font-size: 14px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    max-width: 250px;
+    z-index: 1000;
+}
+
+.tooltip strong {
+    display: block;
+    margin-bottom: 8px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #eee;
+    color: #333;
+}
+
+.tooltip-row {
+    display: flex;
+    justify-content: space-between;
+    margin: 4px 0;
+    color: #666;
+}
+
+.tooltip-genre {
+    margin-right: 15px;
+}
+
+.tooltip-value {
+    font-weight: bold;
+    color: #4CAF50;
+}
+
+.legend-container {
+    position: absolute;
+    right: 10px;
+    top: 40px;
+    max-height: 400px;
+    overflow-y: auto;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 10px;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    z-index: 1000;
+}
+
+.legend-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.legend-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.legend-container::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.legend-container::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    padding: 4px;
+    margin-bottom: 8px;
+    transition: background-color 0.2s;
+}
+
+.legend-item:hover {
+    background-color: #f5f5f5;
+}
+
+.legend-color {
+    width: 12px;
+    height: 12px;
+    margin-right: 8px;
+    border-radius: 2px;
+}
+
+.legend-text {
+    font-size: 12px;
+    color: #333;
+}
+
+.legend-total {
+    margin-left: 8px;
+    color: #666;
+    font-size: 11px;
+}
