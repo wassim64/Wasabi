@@ -8,6 +8,7 @@ import argparse
 def process_genre_evolution(limit=None):
     songs_path = 'public/json/song.json'
     albums_path = 'public/json/album.json'
+    artists_path = 'public/json/artist-without-members.json'
     output_path = 'public/karim/genre_evolution.json'
     
     # Chargement optimisé des albums
@@ -49,8 +50,33 @@ def process_genre_evolution(limit=None):
                 'cover_small': current_album.get('cover_small', '')
             }
 
-    # Structure de données optimisée
-    genre_evolution = defaultdict(lambda: defaultdict(dict))
+    # Chargement des artistes
+    print("Chargement des artistes...")
+    artist_info = {}
+    with open(artists_path, 'rb') as f:
+        artists = ijson.items(f, 'item')
+        
+        print("Début du chargement des artistes...")
+        
+        for artist in artists:
+            artist_id = artist.get('_id', {}).get('$oid', '')
+            if artist_id:
+                artist_info[artist_id] = {
+                    'name': artist.get('name', ''),
+                    'picture_small': artist.get('picture', {}).get('small', ''),
+                    'country': artist.get('location', {}).get('country', '')
+                }
+
+    print(f"Nombre d'artistes chargés: {len(artist_info)}")
+
+    # Structure pour stocker les données
+    genre_evolution = defaultdict(lambda: defaultdict(lambda: {
+        "count": 0,
+        "rank_sum": 0,
+        "rank_avg": 0,
+        "albums": {},
+        "artists": {}  # Nouvelle structure pour les artistes
+    }))
     
     # Traitement des chansons
     print("Traitement des chansons...")
@@ -85,7 +111,8 @@ def process_genre_evolution(limit=None):
                         "count": 0,
                         "rank_sum": 0,
                         "rank_avg": 0,
-                        "albums": {}
+                        "albums": {},
+                        "artists": {}
                     }
                 
                 year_genre = genre_evolution[year][genre]
@@ -93,24 +120,47 @@ def process_genre_evolution(limit=None):
                 year_genre["rank_sum"] += rank
                 year_genre["rank_avg"] = year_genre["rank_sum"] / year_genre["count"]
                 
-                # Mise à jour des données de l'album
+                # Récupération des infos de l'album et de l'artiste
+                album_info_current = album_info.get(album_id, {})
+                artist_id = album_info_current.get('id_artist', '')
+
+        
+                
+                # Mise à jour des statistiques de l'artiste
+                if artist_id:
+                    if artist_id not in year_genre["artists"]:
+                        artist_data = artist_info.get(artist_id, {})  # Récupérer les infos de l'artiste depuis artist_info
+                        year_genre["artists"][artist_id] = {
+                            "name": artist_data.get('name', 'Artiste inconnu'),
+                            "picture_small": artist_data.get('picture_small', ''),
+                            "country": artist_data.get('country', ''),
+                            "count": 0,
+                            "rank_sum": 0,
+                            "rank_avg": 0
+                        }
+                    
+                    artist_stats = year_genre["artists"][artist_id]
+                    artist_stats["count"] += 1
+                    artist_stats["rank_sum"] += rank
+                    artist_stats["rank_avg"] = artist_stats["rank_sum"] / artist_stats["count"]
+
+                # Mise à jour des statistiques de l'album
                 if album_id not in year_genre["albums"]:
                     year_genre["albums"][album_id] = {
                         "count": 0,
                         "rank_sum": 0,
                         "rank_avg": 0,
-                        "country": album_info.get(album_id, {}).get('country', ''),
-                        "id_artist": album_info.get(album_id, {}).get('id_artist', ''),
-                        "name": album_info.get(album_id, {}).get('name', ''),
-                        "publicationDate": album_info.get(album_id, {}).get('publicationDate', ''),
-                        "cover_small": album_info.get(album_id, {}).get('cover_small', '')
+                        "country": album_info_current.get('country', ''),
+                        "name": album_info_current.get('name', ''),
+                        "cover_small": album_info_current.get('cover_small', ''),
+                        "id_artist": artist_id
                     }
                 
                 album_stats = year_genre["albums"][album_id]
                 album_stats["count"] += 1
                 album_stats["rank_sum"] += rank
                 album_stats["rank_avg"] = album_stats["rank_sum"] / album_stats["count"]
-                
+
             except (ValueError, TypeError):
                 continue
     
