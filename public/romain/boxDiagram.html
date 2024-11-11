@@ -4,96 +4,116 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Box Plot with D3.js</title>
-    <label for="dataChoice">Sélectionnez un genre :</label>
-    <select id="dataChoice" onchange="loadData()">
-        <option value="Soul">Soul</option>
-        <option value="Melodic Death Metal">Melodic Death Metal</option>
-        <option value="Disco">Disco</option>
-        <option value="Alternative Hip Hop">Alternative Hip Hop</option>
-        <option value="Avant-garde Metal">Avant-garde Metal</option>
-        <option value="Teen Pop">Teen Pop</option>
-        <option value="Pop">Pop</option>
-        <option value="Hip Hop">Hip Hop</option>
-        <option value="Screamo">Screamo</option>
-        <option value="Country">Country</option>
-        <option value="Acoustic">Acoustic</option>
-        <option value="Grindcore">Grindcore</option>
-        <option value="Progressive Rock">Progressive Rock</option>
-        <option value="Jazz">Jazz</option>
-        <option value="Reggae">Reggae</option>
-        <option value="Brutal Death Metal">Brutal Death Metal</option>
-        <option value="Rock">Rock</option>
-        <option value="Groove Metal">Groove Metal</option>
-        <option value="Post-Punk">Post-Punk</option>
-        <option value="Thrash Metal">Thrash Metal</option>
-        <option value="Christian Rock">Christian Rock</option>
-        <option value="Heavy Metal">Heavy Metal</option>
-        <option value="Synthpop">Synthpop</option>
-        <option value="Indie Rock">Indie Rock</option>
-        <option value="Black Metal">Black Metal</option>
-        <option value="Sludge Metal">Sludge Metal</option>
-        <option value="Europop">Europop</option>
-        <option value="Hardcore Punk">Hardcore Punk</option>
-        <option value="Progressive Metal">Progressive Metal</option>
-        <option value="Punk Rock">Punk Rock</option>
-        <option value="Piano Rock">Piano Rock</option>
-        <option value="Gothic Metal">Gothic Metal</option>
-        <option value="Jazz Fusion">Jazz Fusion</option>
-        <option value="Power Metal">Power Metal</option>
-        <option value="Funk Melody">Funk Melody</option>
-        <option value="Math Rock">Math Rock</option>
-        <option value="Experimental Rock">Experimental Rock</option>
-        <option value="Folk">Folk</option>
-        <option value="Indie Pop">Indie Pop</option>
-        <option value="Post-Hardcore">Post-Hardcore</option>
-        <option value="Neofolk">Neofolk</option>
-        <option value="Speed Metal">Speed Metal</option>
-        <option value="Dance-Pop">Dance-Pop</option>
-        <option value="Hard Rock">Hard Rock</option>
-        <option value="Contemporary Christian">Contemporary Christian</option>
-        <option value="Funk">Funk</option>
-        <option value="New Wave">New Wave</option>
-        <option value="Electronic Rock">Electronic Rock</option>
-        <option value="Pop Rock">Pop Rock</option>
-        <option value="Psychedelic Rock">Psychedelic Rock</option>
-        <option value="MPB">MPB</option>
-        <option value="Children's Music">Children's Music</option>
-        <option value="Classical">Classical</option>
-        <option value="Melodic Metalcore">Melodic Metalcore</option>
-        <option value="Pop Punk">Pop Punk</option>
-        <option value="Industrial Metal">Industrial Metal</option>
-        <option value="Doom Metal">Doom Metal</option>
-        <option value="Street Punk">Street Punk</option>
-        <option value="Death Metal">Death Metal</option>
-        <option value="Alternative Rock">Alternative Rock</option>
-        <option value="Deathcore">Deathcore</option>
-        <option value="Metalcore">Metalcore</option>
-        <option value="EBM">EBM</option>
-        <option value="Gospel">Gospel</option>
-        <option value="Christmas">Christmas</option>
-        <option value="Symphonic Black Metal">Symphonic Black Metal</option>
-        <option value="Dark Wave">Dark Wave</option>
-        <option value="Folk Rock">Folk Rock</option>
-        <option value="K-Pop">K-Pop</option>
-        <option value="Industrial Rock">Industrial Rock</option>
-        <option value="Industrial">Industrial</option>
-        <option value="Emo">Emo</option>
-    </select>
-    <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
-        .box {
-            fill: #69b3a2;
-            stroke: #000;
+        /* Style pour le tooltip */
+        #tooltip {
+            position: absolute;
+            padding: 5px;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
         }
-        .median {
-            stroke: #d62728;
-            stroke-width: 2;
+
+        .legend {
+            font-family: Arial, sans-serif;
+            font-size: 20px;
+            margin: 0 auto;
+            width: fit-content;
+            display: flex;
+            flex-direction: row;
+            gap: 50px;
+        }
+
+        .legend-title {
+            font-weight: bold;
+            display: flex;
+            flex-direction: row;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 5px 0;
+        }
+
+        .color-box {
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+        }
+
+        .parameters {
+            background-color: #ccc;
+            width: fit-content;
+            margin: 0 auto;
+            font-size: 30px;
+        }
+        p {
+            text-align: center;
+            font-size: 20px;
         }
     </style>
 </head>
 <body>
-<svg width="1900" height="800"></svg>
-<script src="boxDiagram.js"/>
+    <p>Cette visualisation affiche la durée des carrière des artistes pour le genre sélectionné.</p>
+    <p>On la retrouve sous la forme d'un diagramme de boite, où l'on peut choisir les durées de carrières que l'on veut visualiser.</p>
+<div class="parameters">
+
+
+<!-- Ajoutez ici les champs de filtre pour la durée -->
+<div>
+    <label for="minYears">Durée minimum (en années) :</label>
+    <input type="number" id="minYears" value="0" min="0" step="0.5" style="font-size: 25px;">
+
+    <label for="maxYears">Durée maximum (en années) :</label>
+    <input type="number" id="maxYears" value="99" min="0" step="0.5" style="font-size: 25px;">
+
+    <button onclick="applyFilter()" style="font-size: 22px">Appliquer le filtre</button>
+</div>
+</div>
+<div  id="tooltip"></div>
+    <div style="display: flex; flex-direction: column; justify-content: center;align-items: center;font-size: 20px">
+<div id="zeroDifferenceCount"></div>
+    <div id="averageCareerDuration"></div>
+    </div>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+    .box {
+        fill: #69b3a2;
+        stroke: #000;
+    }
+    .median {
+        stroke: #d62728;
+        stroke-width: 2;
+    }
+</style>
+    <div style="overflow-x: auto; width: 100%;">
+        <svg width="2000" height="800"></svg>
+    </div>
+<div class="legend">
+    <div>
+    <div class="legend-title">Légende de la couleur :</div>
+    <div style="display: flex; flex-direction: row; gap: 50px;">
+        <div class="legend-item">
+            <div class="color-box" style="background-color: yellow;"></div>
+            <span>Carrières courtes</span>
+        </div>
+        <div class="legend-item">
+            <div class="color-box" style="background-color: red;"></div>
+            <span>Carrières longues</span>
+        </div>
+    </div>
+    </div>
+    <div>
+    <div class="legend-title">Légende du graphique :</div>
+    <span>Axe des Y : durée des carrières en années <br></span>
+    <span>Axe des X : Nom des artistes</span>
+    </div>
+</div>
+<script src="boxDiagram.js"></script>
 
 </body>
 </html>
