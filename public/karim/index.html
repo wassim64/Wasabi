@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Évolution des Genres Musicaux</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Évolution des Genres Musicaux dans le Temps</h1>
+        <h4>Karim CHARLEUX - SI5 FISA</h4>
+        <div class="controls">
+            <div class="control-group">
+                <label>Période :</label>
+                <div class="time-range">
+                    <input type="number" id="startYear" placeholder="Année début">
+                    <span>à</span>
+                    <input type="number" id="endYear" placeholder="Année fin">
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <label for="genreSelect">Genre :</label>
+                <select id="genreSelect">
+                    <option value="">Tous les genres</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label for="countrySelect">Pays :</label>
+                <select id="countrySelect">
+                    <option value="">Tous les pays</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label>Mode d'affichage :</label>
+                <select id="displayMode">
+                    <option value="count">Nombre de chansons</option>
+                    <option value="rank">Popularité moyenne (Rank Deezer)</option>
+                </select>
+            </div>
+            
+            <button id="resetFilters">Réinitialiser les filtres</button>
+        </div>
+
+        <div id="chart"></div>
+
+        <div id="top10" class="top10-container">
+            <h3>Top 10 Artistes <span id="top10Year"></span></h3>
+            <div id="top10List"></div>
+        </div>
+
+        <div class="description">
+            <h3>À propos de cette visualisation</h3>
+            <p>Ce graphique montre l'évolution des genres musicaux dans le temps selon deux métriques :</p>
+            <ul>
+                <li><strong>Nombre de chansons :</strong> Affiche le nombre total de chansons par genre.</li>
+                <li><strong>Popularité (Rank Deezer) :</strong> Affiche la popularité moyenne des chansons basée sur le "rank" Deezer.
+                    Le rank va de 0 à 1 million, où 1 million représente la popularité maximale. Cette métrique est mise à jour quotidiennement
+                    en fonction des écoutes des utilisateurs Deezer.</li>
+            </ul>
+        </div>
+    </div>
+    <script src="stacked-area-graph.js"></script>
+</body>
+</html>
