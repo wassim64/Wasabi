@@ -66,16 +66,20 @@ function loadData() {
         
         initializeFilters();
         
-        // Appliquer les paramètres de l'URL si présents
+        // Appliquer les paramètres par défaut ou de l'URL
         const params = getUrlParameters();
-        if (params.start) document.getElementById('yearStart').value = params.start;
-        if (params.end) document.getElementById('yearEnd').value = params.end;
-        if (params.genre) {
-            document.getElementById('genreSelect').value = params.genre;
-            filterByGenre(params.genre);
-        } else {
-            updateVisualization();
-        }
+        
+        // Définir les valeurs par défaut
+        document.getElementById('yearStart').value = params.start || '1950';
+        document.getElementById('yearEnd').value = params.end || '2024';
+        document.getElementById('genreSelect').value = params.genre || 'rock';
+        document.getElementById('depthRange').value = '2';
+        document.getElementById('depthValue').textContent = '2';
+        document.getElementById('minConnections').value = '10';
+        document.getElementById('connectionsValue').textContent = '10';
+        
+        // Filtrer avec le genre initial
+        filterByGenre(params.genre || 'rock');
         
         setupEventListeners();
     });
@@ -452,4 +456,16 @@ document.addEventListener('click', function(event) {
     }
 });
 
-loadData();
+// Ajouter au début du fichier une fonction pour définir l'URL initiale si aucun paramètre n'est présent
+function setInitialUrlIfNeeded() {
+    const params = new URLSearchParams(window.location.search);
+    if (!params.has('genre') && !params.has('start') && !params.has('end')) {
+        updateUrlParameters('rock', '1950', '2024');
+    }
+}
+
+// Modifier l'appel initial
+document.addEventListener('DOMContentLoaded', function() {
+    setInitialUrlIfNeeded();
+    loadData();
+});
