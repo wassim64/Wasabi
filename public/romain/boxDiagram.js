@@ -48,7 +48,7 @@ function loadData() {
 
         const zeroDifferenceCount = allData.length - withDate.length;
         document.getElementById("zeroDifferenceCount").textContent =
-            "Nombre d'artistes avec 0 jours de différence : " + zeroDifferenceCount + " sur " + allData.length + " artistes"
+            "Nombre d'artistes avec 1 seul album/son : " + zeroDifferenceCount + " sur " + allData.length + " artistes"
         +" de l'année "+startDate.getFullYear()+" à l'année "+endDate.getFullYear();
 
         const averageCareerDuration = calculateAverageCareerDuration(withDate);
