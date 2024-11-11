@@ -18,7 +18,7 @@ def process_choropleth_data():
         
         i = 0
         for obj in ijson.items(file, 'item'):
-            if i < 900:
+            if i < 5000:
                 country = obj.get('country')
                 genre = obj.get('genre')
                 print(country)
@@ -30,7 +30,7 @@ def process_choropleth_data():
                     genre_by_country[country][genre] += 1
                 i += 1
             else:
-                print(f"[INFO] Limite de traitement atteinte (900 enregistrements)")
+                print(f"[INFO] Limite de traitement atteinte 50 000")
                 break
 
 

@@ -1,28 +1,29 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arbre des Genres Musicaux</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Music Genre Tree Visualizer</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="page-container bg-gray-100">
-        <div class="content-wrapper">
-            <div class="bg-white shadow p-6 min-h-screen">
-                <div class="mb-6">
-                    <h2 class="text-2xl font-bold mb-4">Arbre des Genres Musicaux</h2>
-                    <div id="breadcrumb" class="breadcrumb"></div>
-                </div>
-                
-                <div id="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded" style="display: none;"></div>
-                
-                <div class="edge-container" id="edgeContainer"></div>
-                <div class="tree-container" id="treeContainer"></div>
-            </div>
-        </div>
-    </div>
-    <script src="style.js"></script>
+  <h1>Music Genre Tree Visualizer</h1>
+
+  <div id="visualization-container">
+    <!-- Le graphique D3 sera affiché ici -->
+  </div>
+  <div id="genre-selector-root">
+    <!-- Le sélecteur de genre sera monté ici -->
+  </div>
+
+  <!-- Menu contextuel pour les nœuds -->
+  <div id="nodeContextMenu" class="context-menu" style="display: none;">
+    <div class="menu-item" id="redirectGenre">Detailler ce genre</div>
+    <div class="menu-item" id="redirectTimeline">Voir la répartition de ce genre dans le monde</div>
+    <div class="menu-item" id="close">Fermer le menu</div>
+  </div>
+
+  <script src="https://d3js.org/d3.v6.min.js"></script>
+  <script src="style.js"></script>
 </body>
 </html>
