@@ -3,6 +3,25 @@ function getGenreFromUrl() {
     return params.get("genre");
 }
 
+
+function countSubgenres(genreData) {
+    let count = 0;
+
+    function recursiveCount(subgenres) {
+        subgenres.forEach(subgenre => {
+            if (typeof subgenre === 'string') {
+                count++;
+            } else if (typeof subgenre === 'object') {
+                count++;
+                recursiveCount(subgenre.subgenres);
+            }
+        });
+    }
+
+    recursiveCount(genreData.subgenres);
+    return count;
+}
+
 // Fonction pour rechercher un sous-genre dans les genres
 function findParentGenre(data, subgenreName) {
     for (let genre of data) {
@@ -164,22 +183,35 @@ d3.json('sous-genre.json').then(data => {
         console.error(`Genre ou sous-genre "${genreParam}" non trouvé.`);
         return;
     }
+    const selectedGenreData = findGenreInData(data, genreParam);
 
-    const width = window.innerWidth;
-    const height = window.innerHeight * 1.5;
+    if (selectedGenreData) {
+        const subgenreCount = countSubgenres(selectedGenreData);
+        
+        // Afficher le nombre de sous-genres
+        d3.select('body').append('div')
+            .attr('id', 'subgenreCount')
+            .style('font-size', '1.5em')
+            .text(`Nombre de sous-genres pour ${selectedGenreData.genre}: ${subgenreCount}`);
+    }
+
+
+    const width = window.innerWidth ;
+    const height = window.innerHeight *1.5 ;
     const tree = d3.tree()
-        .size([height, width / 1.5])
+        .size([height, width /1.6])
         .separation((a, b) => a.parent === b.parent ? 10 : 10);
 
     const hierarchy = d3.hierarchy(transformedData);
     const root_node = tree(hierarchy);
     let findAllParentsData = findAllParents(data, genreParam);
 
+
     const svg = d3.select('body')
         .append('svg')
         .attr('width', width)
         .attr('height', height)
-        .style("transform", "scale(0.7) translateY(-700px)");
+        .style("transform", "translateY(7vh) ");
 
     const link = svg.selectAll('.link')
         .data(root_node.links())
@@ -200,22 +232,22 @@ d3.json('sous-genre.json').then(data => {
         .attr('transform', d => `translate(${d.y}, ${d.x})`);
 
     node.append('circle')
-        .attr('r', 4.5)
+        .attr('r', 3)
         .classed('highlighted', d => VerifParent(d.data.name, findAllParentsData, genreParam));
 
     node.append('text')
-        .attr('dx', 10)
-        .attr('dy', 15)
+        .attr('dx', 5)
+        .attr('dy', 4)
         .style('text-anchor', 'start')
-        .style('font-size', '50px')
-        .classed('highlighted', d => VerifParent(d.data.name, findAllParentsData, genreParam))
+        .style('font-size', '1em')
+        .style('fill', d => VerifParent(d.data.name, findAllParentsData, genreParam) ? 'blue' : '#333') // appliquer conditionnellement la couleur ici
         .text(d => d.data.name)
         .on('click', function(event, d) {
             // Le reste du code du menu contextuel reste inchangé
             const contextMenu = document.getElementById('nodeContextMenu');
             contextMenu.style.display = 'block';
-            contextMenu.style.left = `${event.pageX+10}px`;
-            contextMenu.style.top = `${event.pageY-10}px`;
+            contextMenu.style.left = `${event.pageX}px`;
+            contextMenu.style.top = `${event.pageY}px`;
 
             document.getElementById('redirectTimeline').onclick = () => {
                 const yearStart = new URLSearchParams(window.location.search).get('start');
@@ -223,36 +255,18 @@ d3.json('sous-genre.json').then(data => {
                 window.location.href = `/public/wassim/choroplethMap.html?genre=${d.data.name}&start=${yearStart}&end=${yearEnd}`;
             };
 
-            document.getElementById('redirectNetwork').onclick = () => {
+            document.getElementById('redirectGenre').onclick = () => {
                 const yearStart = new URLSearchParams(window.location.search).get('start');
                 const yearEnd = new URLSearchParams(window.location.search).get('end');
-                window.location.href = `/public/romain/boxDiagram.html?genre=${d.data.name}&start=${yearStart}&end=${yearEnd}`;
+                window.location.href = `../Elias/index.html?genre=${d.data.name}&start=${yearStart}&end=${yearEnd}`;
             };
 
-            document.getElementById('redirectBubble').onclick = () => {
-                const yearStart = new URLSearchParams(window.location.search).get('start');
-                const yearEnd = new URLSearchParams(window.location.search).get('end');
-                window.location.href = `/public/elias/index.html?genre=${d.data.name}&start=${yearStart}&end=${yearEnd}`;
-            };
-
-            document.getElementById('redirectWordcloud').onclick = () => {
-                const yearStart = new URLSearchParams(window.location.search).get('start');
-                const yearEnd = new URLSearchParams(window.location.search).get('end');
-                window.location.href = `/public/karim/index.html?genre=${d.data.name}&start=${yearStart}&end=${yearEnd}`;
-            };
-        });
-
-        let twice = false;
-        document.addEventListener('click', function(event) {
-            const contextMenu = document.getElementById('nodeContextMenu');
-            if (twice && contextMenu.style.display === 'block' && !contextMenu.contains(event.target)) {
-                contextMenu.style.display = 'none';
-                twice = false;
-            } else {
-                if (contextMenu.style.display === 'none') {
-                    contextMenu.style.display = 'block';
+            document.getElementById('close').onclick = () => {
+                const menu = document.getElementById("nodeContextMenu");
+                if ( menu.style.display=="block") {
+                    menu.style.display = "none";
                 }
-                twice = true;
-            }
+            };
         });
+
 });

@@ -28,6 +28,24 @@ const linkTooltip = d3.select('body')
     .attr('class', 'link-tooltip')
     .style('opacity', 0);
 
+// Ajouter au début du fichier, après les déclarations de variables
+function getUrlParameters() {
+    const params = new URLSearchParams(window.location.search);
+    return {
+        genre: params.get('genre'),
+        start: params.get('start'),
+        end: params.get('end')
+    };
+}
+
+function updateUrlParameters(genre, start, end) {
+    const url = new URL(window.location);
+    if (genre) url.searchParams.set('genre', genre);
+    if (start) url.searchParams.set('start', start);
+    if (end) url.searchParams.set('end', end);
+    window.history.pushState({}, '', url);
+}
+
 // Fonction pour charger et initialiser les données
 function loadData() {
     d3.json('genre_network.json').then(data => {
@@ -45,8 +63,24 @@ function loadData() {
             option.value = option.text = genre;
             genreSelect.add(option);
         });
+        
         initializeFilters();
-        updateVisualization();
+        
+        // Appliquer les paramètres par défaut ou de l'URL
+        const params = getUrlParameters();
+        
+        // Définir les valeurs par défaut
+        document.getElementById('yearStart').value = params.start || '1950';
+        document.getElementById('yearEnd').value = params.end || '2024';
+        document.getElementById('genreSelect').value = params.genre || 'rock';
+        document.getElementById('depthRange').value = '2';
+        document.getElementById('depthValue').textContent = '2';
+        document.getElementById('minConnections').value = '10';
+        document.getElementById('connectionsValue').textContent = '10';
+        
+        // Filtrer avec le genre initial
+        filterByGenre(params.genre || 'rock');
+        
         setupEventListeners();
     });
 }
@@ -213,18 +247,6 @@ function updateVisualization() {
             contextMenu.style.display = 'none';
         };
 
-        document.getElementById('redirectTimeline').onclick = () => {
-            const yearStart = document.getElementById('yearStart').value;
-            const yearEnd = document.getElementById('yearEnd').value;
-            window.location.href = `/public/wassim/choroplethMap.html?genre=${d.id}&start=${yearStart}&end=${yearEnd}`;
-        };
-
-        document.getElementById('redirectNetwork').onclick = () => {
-            const yearStart = document.getElementById('yearStart').value;
-            const yearEnd = document.getElementById('yearEnd').value;
-            window.location.href = `/public/romain/boxDiagram.html?genre=${d.id}&start=${yearStart}&end=${yearEnd}`;
-        };
-
         document.getElementById('redirectBubble').onclick = () => {
             const yearStart = document.getElementById('yearStart').value;
             const yearEnd = document.getElementById('yearEnd').value;
@@ -314,6 +336,9 @@ function filterByGenre(centralGenre) {
 // Configuration des écouteurs d'événements
 function setupEventListeners() {
     document.getElementById('genreSelect').addEventListener('change', function(e) {
+        const yearStart = document.getElementById('yearStart').value;
+        const yearEnd = document.getElementById('yearEnd').value;
+        updateUrlParameters(e.target.value, yearStart, yearEnd);
         filterByGenre(e.target.value);
     });
     document.getElementById('depthRange').addEventListener('input', function(e) {
@@ -338,6 +363,8 @@ function setupEventListeners() {
         document.getElementById('connectionsValue').textContent = 10;
         document.getElementById('minSongs').value = 0;
         document.getElementById('minArtists').value = 0;
+        // Réinitialiser l'URL
+        window.history.pushState({}, '', window.location.pathname);
         currentData = JSON.parse(JSON.stringify(originalData));
         updateVisualization();
     });
@@ -349,10 +376,16 @@ function setupEventListeners() {
     });
 
     document.getElementById('yearStart').addEventListener('change', function() {
+        const genre = document.getElementById('genreSelect').value;
+        const yearEnd = document.getElementById('yearEnd').value;
+        updateUrlParameters(genre, this.value, yearEnd);
         filterByYearRange();
     });
 
     document.getElementById('yearEnd').addEventListener('change', function() {
+        const genre = document.getElementById('genreSelect').value;
+        const yearStart = document.getElementById('yearStart').value;
+        updateUrlParameters(genre, yearStart, this.value);
         filterByYearRange();
     });
 
@@ -411,4 +444,16 @@ document.addEventListener('click', function(event) {
     }
 });
 
-loadData();
+// Ajouter au début du fichier une fonction pour définir l'URL initiale si aucun paramètre n'est présent
+function setInitialUrlIfNeeded() {
+    const params = new URLSearchParams(window.location.search);
+    if (!params.has('genre') && !params.has('start') && !params.has('end')) {
+        updateUrlParameters('rock', '1950', '2024');
+    }
+}
+
+// Modifier l'appel initial
+document.addEventListener('DOMContentLoaded', function() {
+    setInitialUrlIfNeeded();
+    loadData();
+});

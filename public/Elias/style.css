@@ -2,8 +2,8 @@ body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    color: #333; /* Texte sombre */
-    background-color: #f4f4f4; /* Couleur de fond douce pour le body */
+    color: #333;
+    background-color: #f4f4f4; 
     display: flex;
     justify-content: center;
     align-items: center;
@@ -11,38 +11,34 @@ body {
   }
 
 .node circle {
-    fill: #fff; /* Couleur de fond du cercle (nœud) */
-    stroke: steelblue; /* Couleur de la bordure */
-    stroke-width: 1.5px; /* Largeur de la bordure */
-    transition: fill 0.3s ease, stroke 0.3s ease; /* Ajout de transitions pour les effets */
+    fill: #fff;
+    stroke: steelblue; 
+    stroke-width: 1.5px; 
+    transition: fill 0.3s ease, stroke 0.3s ease; 
 }
 
 /* Texte des nœuds */
 .node text {
-    font: 10px sans-serif; /* Police simple et petite */
-    fill: #333; /* Texte sombre */
-    font-weight: normal; /* Texte normal */
+    font: 10px sans-serif;
+    fill: #333; 
+    font-weight: normal; 
 }
 
-/* Liens entre les nœuds */
 .link {
     fill: none;
-    stroke: #ccc; /* Couleur par défaut des liens */
-    stroke-width: 1.5px; /* Largeur des liens */
-    transition: stroke 0.3s ease, stroke-width 0.3s ease; /* Transitions douces pour les liens */
+    stroke: #ccc;
+    stroke-width: 1.5px;
+    transition: stroke 0.3s ease, stroke-width 0.3s ease;
 }
 
 /* Liens et nœuds surlignés */
 .highlighted {
-    stroke: #ff0000 !important; /* Couleur des liens surlignés */
     stroke-width: 3px !important; /* Largeur des liens surlignés */
+    stroke: red !important; /* Couleur des liens surlignés */
+    
 }
 
-/* Texte des nœuds surlignés */
-.highlighted text {
-    font-weight: bold; /* Texte en gras pour les nœuds surlignés */
-    fill: #ff0000; /* Couleur du texte surligné */
-}
+
 
 /* Effet de survol des nœuds */
 .node:hover circle {
@@ -71,15 +67,23 @@ body {
     border-radius: 4px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     padding: 5px 0;
-    z-index: 1000;
-    font-size: 40px;
+    z-index: 500;
+    font-size: 0.7em;
+    width: 30vh;
+    height: 12vh;
+
 }
 
 .menu-item {
-    padding: 8px 15px;
+    padding: 1vh 2vh;
     cursor: pointer;
 }
 
 .menu-item:hover {
     background: #f5f5f5;
+}
+
+#redirectGenre{
+    font-weight: bold;
+    color: #ff0000 !important;
 }

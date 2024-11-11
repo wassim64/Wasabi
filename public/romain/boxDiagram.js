@@ -6,18 +6,18 @@ function getGenreFromURL() {
 }
 function getStartDateFromURL() {
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('dateA')){
-        return new Date(urlParams.get('dateA'));
+    if (urlParams.get('start')){
+        return new Date(urlParams.get('start'));
     }else{
-        return  new Date('2000');
+        return  new Date('1900');
     }}
 
 function getEndDateFromURL() {
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('dateAP')){
-        return new Date(urlParams.get('dateAP'));
+    if (urlParams.get('end')){
+        return new Date(urlParams.get('end'));
     }else{
-        return  new Date('2020');
+        return  new Date('2024');
     }
 
 }
@@ -26,6 +26,7 @@ function getEndDateFromURL() {
 // Définir la variable genre en haut du fichier
 const genre = getGenreFromURL();
 var averageCareerDuration;
+document.getElementById("genreDisplay").textContent = "Le genre affiché est : " + genre.charAt(0).toUpperCase() + genre.slice(1);
 function loadData() {
     // Charger les données depuis le fichier JSON local
     d3.json("output_songs_by_genre.json").then(data => {
@@ -145,7 +146,13 @@ function applyFilter() {
         })
         .on("mouseout", () => {
             tooltip.style("opacity", 0);
-        });
+        }) .on("click", (event, d) => {
+        // Positionner et afficher le menu contextuel
+        const menu = document.getElementById("contextMenu");
+        menu.style.display = "block";
+        menu.style.left = event.pageX + "px";
+        menu.style.top = event.pageY + "px";
+    });
 
     svg.append("line")
         .attr("x1", margin.left)
@@ -186,4 +193,19 @@ function applyFilter() {
     svg.append("g")
         .attr("transform", `translate(${margin.left},0)`)
         .call(d3.axisLeft(y).tickFormat(d => d + " ans"));
+
+
 }
+
+document.getElementById("lienKarim").onclick = function() {
+    window.location.href = "../karim/index.html?genre="+genre+"&start="+startDate.getFullYear()+"&end="+endDate.getFullYear();
+};
+
+
+document.getElementById("fermer").onclick = function() {
+
+    const menu = document.getElementById("contextMenu");
+    if ( menu.style.display=="block") {
+        menu.style.display = "none";
+    }
+};
