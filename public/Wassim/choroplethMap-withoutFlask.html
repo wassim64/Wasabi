@@ -12,7 +12,6 @@
         .legend {
             font-size: 12px;
         }
-        /* Style pour centrer et espacer la barre de sélection */
         .controls {
             text-align: center;
             margin-bottom: 10px;
@@ -35,119 +34,41 @@
 </head>
 <body>
     <div class="controls">
-    <label for="genreChoice">Select Genre:</label>
-    <select id="genreChoice" onchange="updateMap()">
-        <option value="Soul">Soul</option>
-        <option value="Melodic Death Metal">Melodic Death Metal</option>
-        <option value="Disco">Disco</option>
-        <option value="Alternative Hip Hop">Alternative Hip Hop</option>
-        <option value="Avant-garde Metal">Avant-garde Metal</option>
-        <option value="Teen Pop">Teen Pop</option>
-        <option value="Pop">Pop</option>
-        <option value="Hip Hop">Hip Hop</option>
-        <option value="Screamo">Screamo</option>
-        <option value="Country">Country</option>
-        <option value="Acoustic">Acoustic</option>
-        <option value="Grindcore">Grindcore</option>
-        <option value="Progressive Rock">Progressive Rock</option>
-        <option value="Jazz">Jazz</option>
-        <option value="Reggae">Reggae</option>
-        <option value="Brutal Death Metal">Brutal Death Metal</option>
-        <option value="Rock">Rock</option>
-        <option value="Groove Metal">Groove Metal</option>
-        <option value="Post-Punk">Post-Punk</option>
-        <option value="Thrash Metal">Thrash Metal</option>
-        <option value="Christian Rock">Christian Rock</option>
-        <option value="Heavy Metal">Heavy Metal</option>
-        <option value="Synthpop">Synthpop</option>
-        <option value="Indie Rock">Indie Rock</option>
-        <option value="Black Metal">Black Metal</option>
-        <option value="Sludge Metal">Sludge Metal</option>
-        <option value="Europop">Europop</option>
-        <option value="Hardcore Punk">Hardcore Punk</option>
-        <option value="Progressive Metal">Progressive Metal</option>
-        <option value="Punk Rock">Punk Rock</option>
-        <option value="Piano Rock">Piano Rock</option>
-        <option value="Gothic Metal">Gothic Metal</option>
-        <option value="Jazz Fusion">Jazz Fusion</option>
-        <option value="Power Metal">Power Metal</option>
-        <option value="Funk Melody">Funk Melody</option>
-        <option value="Math Rock">Math Rock</option>
-        <option value="Experimental Rock">Experimental Rock</option>
-        <option value="Folk">Folk</option>
-        <option value="Indie Pop">Indie Pop</option>
-        <option value="Post-Hardcore">Post-Hardcore</option>
-        <option value="Neofolk">Neofolk</option>
-        <option value="Speed Metal">Speed Metal</option>
-        <option value="Dance-Pop">Dance-Pop</option>
-        <option value="Hard Rock">Hard Rock</option>
-        <option value="Contemporary Christian">Contemporary Christian</option>
-        <option value="Funk">Funk</option>
-        <option value="New Wave">New Wave</option>
-        <option value="Electronic Rock">Electronic Rock</option>
-        <option value="Pop Rock">Pop Rock</option>
-        <option value="Psychedelic Rock">Psychedelic Rock</option>
-        <option value="MPB">MPB</option>
-        <option value="Children's Music">Children's Music</option>
-        <option value="Classical">Classical</option>
-        <option value="Melodic Metalcore">Melodic Metalcore</option>
-        <option value="Pop Punk">Pop Punk</option>
-        <option value="Industrial Metal">Industrial Metal</option>
-        <option value="Doom Metal">Doom Metal</option>
-        <option value="Street Punk">Street Punk</option>
-        <option value="Death Metal">Death Metal</option>
-        <option value="Alternative Rock">Alternative Rock</option>
-        <option value="Deathcore">Deathcore</option>
-        <option value="Metalcore">Metalcore</option>
-        <option value="EBM">EBM</option>
-        <option value="Gospel">Gospel</option>
-        <option value="Christmas">Christmas</option>
-        <option value="Symphonic Black Metal">Symphonic Black Metal</option>
-        <option value="Dark Wave">Dark Wave</option>
-        <option value="Folk Rock">Folk Rock</option>
-        <option value="K-Pop">K-Pop</option>
-        <option value="Industrial Rock">Industrial Rock</option>
-        <option value="Industrial">Industrial</option>
-        <option value="Emo">Emo</option>
-
-
-    </select>
-</div>
+        <label for="genreChoice">Select Genre:</label>
+        <select id="genreChoice" onchange="updateMap()">
+            <!-- Options for genres go here -->
+            <option value="Soul">Soul</option>
+            <option value="Rock">Rock</option>
+            <!-- Ajoutez d'autres genres ici -->
+        </select>
+    </div>
 
     <div id="legend" class="controls"></div>
-
     <svg width="960" height="600"></svg>
-
     <div id="tooltip" class="tooltip"></div>
 
-   
-
     <script>
-        const width = 1200,  // Largeur du SVG
-        height = 800;  // Hauteur du SVG
-
+        const width = 1200;
+        const height = 800;
         const svg = d3.select("svg")
               .attr("width", width)
               .attr("height", height);
 
         const tooltip = d3.select("#tooltip");
 
-        // Utiliser une projection Mercator et ajuster l'échelle et la translation pour centrer
         const projection = d3.geoMercator()
-                     .scale(150) // Ajustez l'échelle si nécessaire pour remplir le SVG
-                     .translate([width / 1.7, height / 1.5]); // Centrez la carte
+                             .scale(150)
+                             .translate([width / 1.7, height / 1.5]);
 
         const path = d3.geoPath().projection(projection);
-
-        // Échelle de couleur pour la carte
         const colorScale = d3.scaleSequential(d3.interpolateBlues);
 
         let choroplethData;
 
-        // Charger les données de la carte et des genres
+        // Charger le JSON de données de choroplèthe directement depuis le fichier local
         Promise.all([
             d3.json("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson"),
-            fetch("./choropleth_data.json").then(response => response.json())
+            d3.json("choropleth_data.json")  // Chargez directement le fichier JSON local
         ]).then(([mapData, data]) => {
             choroplethData = data;
             svg.selectAll("path")
@@ -155,7 +76,7 @@
                .enter().append("path")
                .attr("d", path)
                .attr("class", "country")
-               .style("fill", "#e0e0e0") // Couleur initiale
+               .style("fill", "#e0e0e0")
                .on("mouseover", handleMouseOver)
                .on("mousemove", handleMouseMove)
                .on("mouseout", handleMouseOut);
@@ -191,7 +112,6 @@
             "VI": "VIR", "WF": "WLF", "EH": "ESH", "YE": "YEM", "ZM": "ZMB", "ZW": "ZWE"
         };
 
-
         function updateMap() {
             const selectedGenre = document.getElementById("genreChoice").value;
 
@@ -207,15 +127,11 @@
                .transition()
                .duration(500)
                .style("fill", d => {
-                   //const country = d.properties.name;
-                    const countryCode3 = d.id;
-                    const countryCode2 = Object.keys(isoCodes2To3).find(key => isoCodes2To3[key] === countryCode3);
-
-                   //const genreCount = choroplethData[country] ? choroplethData[country][selectedGenre] || 0 : 0;
-                   const genreCount = countryCode2 && choroplethData[countryCode2] 
-                    ? choroplethData[countryCode2][selectedGenre] || 0 
-                    : 0;
-
+                   const countryCode3 = d.id;
+                   const countryCode2 = Object.keys(isoCodes2To3).find(key => isoCodes2To3[key] === countryCode3);
+                   const genreCount = countryCode2 && choroplethData[countryCode2]
+                       ? choroplethData[countryCode2][selectedGenre] || 0
+                       : 0;
                    return genreCount > 0 ? colorScale(genreCount) : "#e0e0e0";
                });
 
@@ -225,7 +141,7 @@
         function updateLegend(maxFrequency) {
             const legendWidth = 300, legendHeight = 10;
 
-            d3.select("#legend").html(""); // Réinitialiser la légende
+            d3.select("#legend").html("");
 
             const legendSvg = d3.select("#legend")
                                 .append("svg")
@@ -237,9 +153,7 @@
                                   .domain([0, maxFrequency])
                                   .range([0, legendWidth]);
 
-            const legendAxis = d3.axisBottom(legendScale)
-                                 .ticks(5)
-                                 .tickFormat(d3.format(".0f"));
+            const legendAxis = d3.axisBottom(legendScale).ticks(5).tickFormat(d3.format(".0f"));
 
             legendSvg.selectAll("rect")
                      .data(d3.range(0, maxFrequency, maxFrequency / legendWidth))
@@ -254,8 +168,6 @@
                      .attr("transform", `translate(0, ${legendHeight})`)
                      .call(legendAxis);
         }
-
-
 
         function handleMouseOver(event, d) {
             const countryCode3 = d.id;
@@ -277,8 +189,6 @@
         function handleMouseOut() {
             tooltip.style("opacity", 0);
         }
-
-
     </script>
 </body>
 </html>
