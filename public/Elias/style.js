@@ -211,7 +211,7 @@ d3.json('sous-genre.json').then(data => {
         .append('svg')
         .attr('width', width)
         .attr('height', height)
-        .style("transform", "scale(0.7) ");
+        .style("transform", "translateY(7vh) ");
 
     const link = svg.selectAll('.link')
         .data(root_node.links())
@@ -240,14 +240,14 @@ d3.json('sous-genre.json').then(data => {
         .attr('dy', 4)
         .style('text-anchor', 'start')
         .style('font-size', '1em')
-        .classed('highlighted', d => VerifParent(d.data.name, findAllParentsData, genreParam))
+        .style('fill', d => VerifParent(d.data.name, findAllParentsData, genreParam) ? 'blue' : '#333') // appliquer conditionnellement la couleur ici
         .text(d => d.data.name)
         .on('click', function(event, d) {
             // Le reste du code du menu contextuel reste inchangé
             const contextMenu = document.getElementById('nodeContextMenu');
             contextMenu.style.display = 'block';
-            contextMenu.style.left = `${event.pageX+10}px`;
-            contextMenu.style.top = `${event.pageY-10}px`;
+            contextMenu.style.left = `${event.pageX}px`;
+            contextMenu.style.top = `${event.pageY}px`;
 
             document.getElementById('redirectTimeline').onclick = () => {
                 const yearStart = new URLSearchParams(window.location.search).get('start');
