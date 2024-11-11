@@ -61,16 +61,7 @@ function updateVisualization() {
     // Nettoyer la visualisation existante
     g.selectAll('*').remove();
 
-    // Créer la simulation de force
-    simulation = d3.forceSimulation(currentData.nodes)
-        .force('link', d3.forceLink(currentData.links)
-            .id(d => d.id)
-            .distance(100))
-        .force('charge', d3.forceManyBody().strength(-200))
-        .force('center', d3.forceCenter(width / 2, height / 2))
-        .force('collision', d3.forceCollide().radius(30));
-
-    // Échelles
+    // Définir les échelles en premier
     const linkScale = d3.scaleLinear()
         .domain([0, d3.max(currentData.links, d => d.weight)])
         .range([1, maxLinkWidth]);
@@ -78,6 +69,19 @@ function updateVisualization() {
     const nodeScale = d3.scaleLinear()
         .domain([0, d3.max(currentData.nodes, d => d.songCount)])
         .range([5, 20]);
+
+    // Créer la simulation de force avec nodeScale maintenant disponible
+    simulation = d3.forceSimulation(currentData.nodes)
+        .force('link', d3.forceLink(currentData.links)
+            .id(d => d.id)
+            .distance(d => 100 + (d.weight / 2)))
+        .force('charge', d3.forceManyBody()
+            .strength(d => -200 - (d.artistCount / 2)))
+        .force('collide', d3.forceCollide()
+            .radius(d => nodeScale(d.songCount) + 20))
+        .force('center', d3.forceCenter(width / 2, height / 2))
+        .force('x', d3.forceX(width / 2).strength(0.1))
+        .force('y', d3.forceY(height / 2).strength(0.1));
 
     // Dessiner les liens
     const link = g.append('g')
