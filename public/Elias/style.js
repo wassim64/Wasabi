@@ -137,7 +137,7 @@
           .append('svg')
           .attr('width', width)
           .attr('height', height)
-          .style("transform", "scale(0.8)");
+          .style("transform", "scale(0.7) translateY(-700px)");
 
           const link = svg.selectAll('.link')
           .data(root_node.links())

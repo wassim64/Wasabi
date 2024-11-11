@@ -2,30 +2,63 @@ body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
+    color: #333; /* Texte sombre */
+    background-color: #f4f4f4; /* Couleur de fond douce pour le body */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
   }
 
-  .node circle {
-    fill: #fff;
-    stroke: steelblue;
-    stroke-width: 1.5px;
-  }
+.node circle {
+    fill: #fff; /* Couleur de fond du cercle (nœud) */
+    stroke: steelblue; /* Couleur de la bordure */
+    stroke-width: 1.5px; /* Largeur de la bordure */
+    transition: fill 0.3s ease, stroke 0.3s ease; /* Ajout de transitions pour les effets */
+}
 
-  .node text {
-    font: 10px sans-serif;
-  }
+/* Texte des nœuds */
+.node text {
+    font: 10px sans-serif; /* Police simple et petite */
+    fill: #333; /* Texte sombre */
+    font-weight: normal; /* Texte normal */
+}
 
-  .link {
+/* Liens entre les nœuds */
+.link {
     fill: none;
-    stroke: #ccc;
-    stroke-width: 1.5px;
-  }
+    stroke: #ccc; /* Couleur par défaut des liens */
+    stroke-width: 1.5px; /* Largeur des liens */
+    transition: stroke 0.3s ease, stroke-width 0.3s ease; /* Transitions douces pour les liens */
+}
 
-  .highlighted {
-    stroke: #ff0000 !important;
-    stroke-width: 3px !important;
-  }
+/* Liens et nœuds surlignés */
+.highlighted {
+    stroke: #ff0000 !important; /* Couleur des liens surlignés */
+    stroke-width: 3px !important; /* Largeur des liens surlignés */
+}
 
-  .highlighted text {
-    font-weight: bold;
-    fill: #ff0000;
-  }
+/* Texte des nœuds surlignés */
+.highlighted text {
+    font-weight: bold; /* Texte en gras pour les nœuds surlignés */
+    fill: #ff0000; /* Couleur du texte surligné */
+}
+
+/* Effet de survol des nœuds */
+.node:hover circle {
+    fill: #ffeb3b; /* Couleur jaune clair au survol */
+    stroke: #f39c12; /* Bordure orange au survol */
+    stroke-width: 2px; /* Largeur augmentée */
+}
+
+/* Effet de survol du texte des nœuds */
+.node:hover text {
+    fill: #f39c12; /* Texte orange au survol */
+    font-weight: bold; /* Mettre le texte en gras */
+}
+
+/* Effet de survol des liens */
+.link:hover {
+    stroke: #f39c12; /* Couleur orange au survol des liens */
+    stroke-width: 3px; /* Augmenter la largeur du lien au survol */
+}
