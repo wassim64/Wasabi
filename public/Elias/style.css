@@ -70,7 +70,7 @@ body {
     z-index: 500;
     font-size: 0.7em;
     width: 30vh;
-    height: 12vh;
+    height: 20vh;
 
 }
 
@@ -86,4 +86,17 @@ body {
 #redirectGenre{
     font-weight: bold;
     color: #ff0000 !important;
+}
+
+#genre-selector-root {
+    position: fixed;
+    right: 20px;
+    top: 100px;
+    width: 18%;
+    background-color: white;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    max-height: 80vh;
+    overflow-y: auto;
 }

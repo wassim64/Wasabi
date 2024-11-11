@@ -3,14 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Évolution des Genres Musicaux</title>
+    <title>Évolution des Genres Musicaux ⏳</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://d3js.org/d3.v5.min.js"></script>
 </head>
 <body>
     <div class="container">
-        <h1>Évolution des Genres Musicaux dans le Temps</h1>
+        <button id="backButton" class="back-button" onclick="goBack()">
+            <span class="back-icon">◄</span>
+            <span class="back-text">Retour à la vue globale</span>
+        </button>
+        <h1>Évolution des Genres Musicaux dans le Temps ⏳</h1>
         <h4>Karim CHARLEUX - SI5 FISA</h4>
+
         <div class="controls">
             <div class="control-group">
                 <label>Période :</label>
@@ -48,9 +53,15 @@
 
         <div id="chart"></div>
 
-        <div id="top5" class="top5-container">
-            <h3>Top 5 des albums <span id="top5Year"></span></h3>
-            <div id="top5List"></div>
+        <div class="top-container">
+            <div id="top5" class="top5-container">
+                <h3>Top 5 des albums <span id="top5Year"></span></h3>
+                <div id="top5List"></div>
+            </div>
+            <div id="top5Artists" class="top5-container">
+                <h3>Top 5 des artistes <span id="top5ArtistsYear"></span></h3>
+                <div id="top5ArtistsList"></div>
+            </div>
         </div>
 
         <div class="description">
