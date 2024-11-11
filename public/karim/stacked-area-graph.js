@@ -502,10 +502,10 @@ function getTop5Albums(yearData, genre) {
         }
     });
 
-    // Trier et prendre le top 10
+    // Trier et prendre le top 5
     return albums
         .sort((a, b) => b.value - a.value)
-        .slice(0, 10);
+        .slice(0, 5);
 }
 
 // Ajouter cette fonction pour convertir le code pays en emoji drapeau
