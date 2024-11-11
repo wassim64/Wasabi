@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arbre des Genres Musicaux</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="page-container bg-gray-100">
+        <div class="content-wrapper">
+            <div class="bg-white shadow p-6 min-h-screen">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold mb-4">Arbre des Genres Musicaux</h2>
+                    <div id="breadcrumb" class="breadcrumb"></div>
+                </div>
+                
+                <div id="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded" style="display: none;"></div>
+                
+                <div class="edge-container" id="edgeContainer"></div>
+                <div class="tree-container" id="treeContainer"></div>
+            </div>
+        </div>
+    </div>
+    <script src="style.js"></script>
+</body>
+</html>
