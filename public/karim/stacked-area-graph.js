@@ -176,7 +176,6 @@ function updateChart() {
         genreTotals[genre] = d3.sum(filteredData, d => d[genre] || 0);
     });
 
-
     function highlight(d) {
         // Réduire l'opacité de toutes les aires
         layers.selectAll('.area')
@@ -266,12 +265,17 @@ function updateChart() {
         const d0 = filteredData[i - 1];
         const d1 = filteredData[i];
         const d = x0 - d0.year > d1.year - x0 ? d1 : d0;
+        const year = d.year.getFullYear().toString();
 
-        // Mettre à jour la position de la ligne de hover
+        // Mettre à jour la ligne de hover
         hoverLine
             .attr('x1', mouseX)
             .attr('x2', mouseX)
             .style('opacity', 1);
+
+        // Mettre à jour le top 10 des albums
+        const selectedGenre = document.getElementById('genreSelect').value;
+        updateTop5Display(data[year], year, selectedGenre);
 
         // Calculer les pourcentages
         const total = d.total;
@@ -433,56 +437,73 @@ function updateUrlParameters() {
 }
 
 // Ajouter ces fonctions
-
-function getTop10Artists(year, genre, country) {
-    const yearData = data[year];
+function getTop5Albums(yearData, genre) {
     if (!yearData) return [];
 
-    const artists = new Map();
+    const albums = [];
     const displayMode = document.getElementById('displayMode').value;
 
-    // Collecter les données des artistes
-    Object.entries(yearData).forEach(([g, countryData]) => {
+    // Collecter les données des albums
+    Object.entries(yearData).forEach(([g, genreData]) => {
         if (!genre || g === genre) {
-            Object.entries(countryData).forEach(([c, stats]) => {
-                if (!country || c === country) {
-                    Object.entries(stats.artists).forEach(([artist, artistStats]) => {
-                        const currentValue = artists.get(artist) || 0;
-                        const newValue = displayMode === 'count'
-                            ? currentValue + artistStats.count
-                            : currentValue + (artistStats.rank_sum / artistStats.count);
-                        artists.set(artist, newValue);
-                    });
-                }
+            Object.entries(genreData.albums).forEach(([albumId, albumStats]) => {
+                albums.push({
+                    id: albumId,
+                    name: albumStats.name || 'Album inconnu',
+                    value: displayMode === 'count' ? albumStats.count : albumStats.rank_avg,
+                    country: albumStats.country,
+                    id_artist: albumStats.id_artist,
+                    cover_small: albumStats.cover_small
+                });
             });
         }
     });
 
     // Trier et prendre le top 10
-    return Array.from(artists.entries())
-        .sort((a, b) => b[1] - a[1])
+    return albums
+        .sort((a, b) => b.value - a.value)
         .slice(0, 10);
 }
 
-function updateTop10Display(year, genre, country) {
-    const top10Container = document.getElementById('top10');
-    const top10Year = document.getElementById('top10Year');
-    const top10List = document.getElementById('top10List');
+// Ajouter cette fonction pour convertir le code pays en emoji drapeau
+function getCountryFlag(countryCode) {
+    if (!countryCode) return '🌍'; // Emoji globe pour pays inconnu
+    
+    // Convertir le code pays en emoji drapeau
+    const codePoints = countryCode
+        .toUpperCase()
+        .split('')
+        .map(char => 127397 + char.charCodeAt());
+    
+    return String.fromCodePoint(...codePoints);
+}
+
+// Modifier la fonction updateTop5Display
+function updateTop5Display(yearData, year, genre) {
+    const top5Container = document.getElementById('top5');
+    const top5Year = document.getElementById('top5Year');
+    const top5List = document.getElementById('top5List');
     const displayMode = document.getElementById('displayMode').value;
 
-    top10Year.textContent = `en ${year}`;
-    top10Container.style.display = 'block';
+    top5Year.textContent = displayMode === 'count' ? `avec le plus de sons en ${year}` : `avec le meilleur rank en ${year}`;
+    top5Container.style.display = 'block';
 
-    const top10 = getTop10Artists(year, genre, country);
+    const top5 = getTop5Albums(yearData, genre);
     const valueLabel = displayMode === 'count' ? 'chansons' : 'popularité moyenne';
 
-    top10List.innerHTML = top10.map(([artist, value], index) => `
-        <div class="top10-item">
-            <span class="top10-rank">#${index + 1}</span>
-            <span class="top10-artist">${artist}</span>
-            <span class="top10-value">${displayMode === 'count'
-        ? Math.round(value)
-        : Math.round(value).toLocaleString()} ${valueLabel}</span>
+    top5List.innerHTML = top5.map(({name, value, country, cover_small}, index) => `
+        <div class="top5-item">
+            <img src="${cover_small || 'default-album.jpg'}" alt="${name}" class="album-cover">
+            <div class="album-info">
+                <span class="top5-rank">#${index + 1}</span>
+                <span class="album-name">${name}</span>
+                <div class="album-details">
+                    <span class="album-country">${getCountryFlag(country)}</span>
+                    <span class="album-value">${displayMode === 'count'
+                        ? Math.round(value)
+                        : Math.round(value).toLocaleString()} ${valueLabel}</span>
+                </div>
+            </div>
         </div>
     `).join('');
 }
