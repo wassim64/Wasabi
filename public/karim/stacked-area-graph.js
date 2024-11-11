@@ -72,10 +72,6 @@ function populateSelectors() {
     // Remplir les années
     document.getElementById('startYear').value = years[0];
     document.getElementById('endYear').value = years[years.length - 1];
-
-    // Debug
-    console.log("Années disponibles:", years);
-    console.log("Genres disponibles:", Array.from(genres));
 }
 
 // Mettre à jour le graphique
@@ -124,10 +120,6 @@ function updateChart() {
         .x(d => x(d.data.year))
         .y0(d => y(d[0]))
         .y1(d => y(d[1]));
-
-    // Debug des données empilées
-    const stackedData = stack(filteredData);
-    console.log("Données empilées:", stackedData);
 
     // Ajouter les axes
     // Axe X
@@ -184,6 +176,21 @@ function updateChart() {
         genreTotals[genre] = d3.sum(filteredData, d => d[genre] || 0);
     });
 
+    function highlight(d) {
+        // Réduire l'opacité de toutes les aires
+        layers.selectAll('.area')
+            .style('opacity', 0.2);
+        // Augmenter l'opacité de l'aire du genre sélectionné
+        layers.selectAll('.area')
+            .filter(a => a.key === d)
+            .style('opacity', 1);
+    }
+
+    function noHighlight() {
+        layers.selectAll('.area')
+            .style('opacity', 1);
+    }
+
     // Supprimer l'ancienne légende
     svg.selectAll('.legend-container').remove();
 
@@ -212,13 +219,18 @@ function updateChart() {
         .attr('class', 'legend-text')
         .attr('x', 20)
         .attr('y', 9)
+        .style("fill", function(d) {
+            return color(d);
+        })
         .text(d => {
             const total = displayMode === 'count'
                 ? Math.round(genreTotals[d]).toLocaleString()
                 : Math.round(genreTotals[d] / filteredData.length).toLocaleString();
             const label = displayMode === 'count' ? 'sons' : 'score moy.';
             return `${d} (${total} ${label})`;
-        });
+        })
+        .on("mouseover", highlight)
+        .on("mouseleave", noHighlight);
 
     // Ajouter un fond blanc semi-transparent à la légende
     legendContainer.insert('rect', ':first-child')
@@ -231,85 +243,117 @@ function updateChart() {
     // Ajouter l'interaction pour le hover
     const bisectDate = d3.bisector(d => d.year).left;
 
+    // Ajouter une ligne verticale pour le hover
+    const hoverLine = g.append('line')
+        .attr('class', 'hover-line')
+        .attr('y1', 0)
+        .attr('y2', height)
+        .style('opacity', 0);
+
     const overlay = g.append('rect')
         .attr('class', 'overlay')
         .attr('width', width)
         .attr('height', height)
-        .style('opacity', 0);
+        .style('fill', 'none')
+        .style('pointer-events', 'all');
 
-    overlay
-        .on('mousemove', function() {
-            const [mouseX, mouseY] = d3.mouse(this);
-            const x0 = x.invert(mouseX);
-            const i = bisectDate(filteredData, x0, 1);
-            const d0 = filteredData[i - 1];
-            const d1 = filteredData[i];
-            const d = x0 - d0.year > d1.year - x0 ? d1 : d0;
+    // Gérer les interactions de l'overlay
+    overlay.on('mousemove', function() {
+        const [mouseX, mouseY] = d3.mouse(this);
+        const x0 = x.invert(mouseX);
+        const i = bisectDate(filteredData, x0, 1);
+        const d0 = filteredData[i - 1];
+        const d1 = filteredData[i];
+        const d = x0 - d0.year > d1.year - x0 ? d1 : d0;
+        const year = d.year.getFullYear().toString();
 
-            // Calculer les pourcentages
-            const total = d.total;
-            const percentages = {};
-            Object.entries(d).forEach(([key, value]) => {
-                if (key !== 'year' && key !== 'total') {
-                    percentages[key] = ((value / total) * 100).toFixed(1);
-                }
+        // Mettre à jour la ligne de hover
+        hoverLine
+            .attr('x1', mouseX)
+            .attr('x2', mouseX)
+            .style('opacity', 1);
+
+        // Mettre à jour le top 10 des albums
+        const selectedGenre = document.getElementById('genreSelect').value;
+        updateTop5Display(data[year], year, selectedGenre);
+
+        // Calculer les pourcentages
+        const total = d.total;
+        const percentages = {};
+        Object.entries(d).forEach(([key, value]) => {
+            if (key !== 'year' && key !== 'total') {
+                percentages[key] = ((value / total) * 100).toFixed(1);
+            }
+        });
+
+        // Limiter le nombre de genres affichés 
+        const maxGenres = 10;
+
+        // Créer le contenu du tooltip
+        let tooltipContent = `<strong>Année ${d.year.getFullYear()}</strong>`;
+        const displayMode = document.getElementById('displayMode').value;
+
+        Object.entries(percentages)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, maxGenres)
+            .forEach(([genre, percentage]) => {
+                const value = displayMode === 'count'
+                    ? d[genre]
+                    : Math.round(d[genre]);
+                const valueText = displayMode === 'count'
+                    ? `${value} sons (${percentage}%)`
+                    : `Score: ${value} (${percentage}%)`;
+
+                tooltipContent += `
+                    <div class="tooltip-row">
+                        <span class="tooltip-genre">${genre}</span>
+                        <span class="tooltip-value">${valueText}</span>
+                    </div>`;
             });
 
-            // Créer le contenu du tooltip
-            let tooltipContent = `<strong>Année ${d.year.getFullYear()}</strong>`;
-            const displayMode = document.getElementById('displayMode').value;
+        // Ajouter une indication s'il y a plus de genres
+        const totalGenres = Object.keys(percentages).length;
+        if (totalGenres > maxGenres) {
+            tooltipContent += `
+                <div class="tooltip-row" style="margin-top: 8px; font-style: italic; color: #999;">
+                    Et ${totalGenres - maxGenres} autres genres...
+                </div>`;
+        }
 
-            Object.entries(percentages)
-                .sort((a, b) => b[1] - a[1])
-                .forEach(([genre, percentage]) => {
-                    const value = displayMode === 'count'
-                        ? d[genre]
-                        : Math.round(d[genre]);
-                    const valueText = displayMode === 'count'
-                        ? `${value} sons (${percentage}%)`
-                        : `Score: ${value} (${percentage}%)`;
+        // Calculer la position du tooltip
+        const tooltipWidth = 250; // Largeur approximative du tooltip
+        const tooltipHeight = (Object.keys(percentages).length * 25) + 40; // Hauteur approximative
 
-                    tooltipContent += `
-                        <div class="tooltip-row">
-                            <span class="tooltip-genre">${genre}</span>
-                            <span class="tooltip-value">${valueText}</span>
-                        </div>`;
-                });
+        // Position par défaut (à droite du curseur)
+        let tooltipX = mouseX + margin.left + 20;
+        let tooltipY = mouseY + margin.top - (tooltipHeight / 2);
 
-            // Calculer la position du tooltip
-            const tooltipWidth = 250; // Largeur approximative du tooltip
-            const tooltipHeight = (Object.keys(percentages).length * 25) + 40; // Hauteur approximative
+        // Ajuster si le tooltip dépasse à droite
+        if (tooltipX + tooltipWidth > window.innerWidth) {
+            tooltipX = mouseX + margin.left - tooltipWidth - 20;
+        }
 
-            // Position par défaut (à droite du curseur)
-            let tooltipX = mouseX + margin.left + 20;
-            let tooltipY = mouseY + margin.top - (tooltipHeight / 2);
+        // Ajuster si le tooltip dépasse en haut ou en bas
+        if (tooltipY < 0) {
+            tooltipY = 10;
+        } else if (tooltipY + tooltipHeight > window.innerHeight) {
+            tooltipY = window.innerHeight - tooltipHeight - 10;
+        }
 
-            // Ajuster si le tooltip dépasse à droite
-            if (tooltipX + tooltipWidth > window.innerWidth) {
-                tooltipX = mouseX + margin.left - tooltipWidth - 20;
-            }
-
-            // Ajuster si le tooltip dépasse en haut ou en bas
-            if (tooltipY < 0) {
-                tooltipY = 10;
-            } else if (tooltipY + tooltipHeight > window.innerHeight) {
-                tooltipY = window.innerHeight - tooltipHeight - 10;
-            }
-
-            // Positionner et afficher le tooltip
-            tooltip.transition()
-                .duration(200)
-                .style("opacity", 1);
-            tooltip.html(tooltipContent)
-                .style("left", `${tooltipX}px`)
-                .style("top", `${tooltipY}px`);
-        })
-        .on('mouseout', function() {
-            tooltip.transition()
-                .duration(500)
-                .style("opacity", 0);
-        });
+        // Positionner et afficher le tooltip
+        tooltip.transition()
+            .duration(200)
+            .style("opacity", 1);
+        tooltip.html(tooltipContent)
+            .style("left", `${tooltipX}px`)
+            .style("top", `${tooltipY}px`);
+    })
+    .on('mouseout', function() {
+        hoverLine.style('opacity', 0);
+        tooltip.style('opacity', 0);
+    });
 }
+
 
 // Traiter les données selon les filtres
 function processData(startYear, endYear, selectedGenre) {
@@ -393,56 +437,73 @@ function updateUrlParameters() {
 }
 
 // Ajouter ces fonctions
-
-function getTop10Artists(year, genre, country) {
-    const yearData = data[year];
+function getTop5Albums(yearData, genre) {
     if (!yearData) return [];
 
-    const artists = new Map();
+    const albums = [];
     const displayMode = document.getElementById('displayMode').value;
 
-    // Collecter les données des artistes
-    Object.entries(yearData).forEach(([g, countryData]) => {
+    // Collecter les données des albums
+    Object.entries(yearData).forEach(([g, genreData]) => {
         if (!genre || g === genre) {
-            Object.entries(countryData).forEach(([c, stats]) => {
-                if (!country || c === country) {
-                    Object.entries(stats.artists).forEach(([artist, artistStats]) => {
-                        const currentValue = artists.get(artist) || 0;
-                        const newValue = displayMode === 'count'
-                            ? currentValue + artistStats.count
-                            : currentValue + (artistStats.rank_sum / artistStats.count);
-                        artists.set(artist, newValue);
-                    });
-                }
+            Object.entries(genreData.albums).forEach(([albumId, albumStats]) => {
+                albums.push({
+                    id: albumId,
+                    name: albumStats.name || 'Album inconnu',
+                    value: displayMode === 'count' ? albumStats.count : albumStats.rank_avg,
+                    country: albumStats.country,
+                    id_artist: albumStats.id_artist,
+                    cover_small: albumStats.cover_small
+                });
             });
         }
     });
 
     // Trier et prendre le top 10
-    return Array.from(artists.entries())
-        .sort((a, b) => b[1] - a[1])
+    return albums
+        .sort((a, b) => b.value - a.value)
         .slice(0, 10);
 }
 
-function updateTop10Display(year, genre, country) {
-    const top10Container = document.getElementById('top10');
-    const top10Year = document.getElementById('top10Year');
-    const top10List = document.getElementById('top10List');
+// Ajouter cette fonction pour convertir le code pays en emoji drapeau
+function getCountryFlag(countryCode) {
+    if (!countryCode) return '🌍'; // Emoji globe pour pays inconnu
+    
+    // Convertir le code pays en emoji drapeau
+    const codePoints = countryCode
+        .toUpperCase()
+        .split('')
+        .map(char => 127397 + char.charCodeAt());
+    
+    return String.fromCodePoint(...codePoints);
+}
+
+// Modifier la fonction updateTop5Display
+function updateTop5Display(yearData, year, genre) {
+    const top5Container = document.getElementById('top5');
+    const top5Year = document.getElementById('top5Year');
+    const top5List = document.getElementById('top5List');
     const displayMode = document.getElementById('displayMode').value;
 
-    top10Year.textContent = `en ${year}`;
-    top10Container.style.display = 'block';
+    top5Year.textContent = displayMode === 'count' ? `avec le plus de sons en ${year}` : `avec le meilleur rank en ${year}`;
+    top5Container.style.display = 'block';
 
-    const top10 = getTop10Artists(year, genre, country);
+    const top5 = getTop5Albums(yearData, genre);
     const valueLabel = displayMode === 'count' ? 'chansons' : 'popularité moyenne';
 
-    top10List.innerHTML = top10.map(([artist, value], index) => `
-        <div class="top10-item">
-            <span class="top10-rank">#${index + 1}</span>
-            <span class="top10-artist">${artist}</span>
-            <span class="top10-value">${displayMode === 'count'
-        ? Math.round(value)
-        : Math.round(value).toLocaleString()} ${valueLabel}</span>
+    top5List.innerHTML = top5.map(({name, value, country, cover_small}, index) => `
+        <div class="top5-item">
+            <img src="${cover_small || 'default-album.jpg'}" alt="${name}" class="album-cover">
+            <div class="album-info">
+                <span class="top5-rank">#${index + 1}</span>
+                <span class="album-name">${name}</span>
+                <div class="album-details">
+                    <span class="album-country">${getCountryFlag(country)}</span>
+                    <span class="album-value">${displayMode === 'count'
+                        ? Math.round(value)
+                        : Math.round(value).toLocaleString()} ${valueLabel}</span>
+                </div>
+            </div>
         </div>
     `).join('');
 }
