@@ -3,6 +3,42 @@ function getGenreFromUrl() {
     return params.get("genre");
 }
 
+function createGenreSelector(data) {
+    // Créer le conteneur pour le sélecteur
+    const selectorContainer = d3.select('#genre-selector-root')
+
+    console.log(selectorContainer)
+    // Ajouter un titre
+    // Créer la liste des genres
+    const genreList = selectorContainer.append('ul')
+        .style('list-style', 'none')
+        .style('padding', '0')
+        .style('margin', '0');
+
+    // Ajouter chaque genre principal comme un élément de la liste
+    genreList.selectAll('li')
+        .data(data)
+        .enter()
+        .append('li')
+        .style('padding', '5px 10px')
+        .style('cursor', 'pointer')
+        .style('margin-bottom', '5px')
+        .style('border-radius', '3px')
+        .style('transition', 'background-color 0.2s')
+        .text(d => d.genre)
+        .on('mouseover', function(event,d) {
+            d3.select(this).style('background-color', '#f0f0f0');
+        })
+        .on('mouseout', function() {
+            d3.select(this).style('background-color', 'white');
+        })
+        .on('click', function(event,d) {
+            const yearStart = new URLSearchParams(window.location.search).get('start');
+            const yearEnd = new URLSearchParams(window.location.search).get('end');
+            window.location.href = `?genre=${d.genre}&start=${yearStart}&end=${yearEnd}`;
+        });
+}
+
 
 function countSubgenres(genreData) {
     let count = 0;
@@ -183,14 +219,14 @@ d3.json('sous-genre.json').then(data => {
         console.error(`Genre ou sous-genre "${genreParam}" non trouvé.`);
         return;
     }
+    
+    createGenreSelector(data);
+
     const selectedGenreData = findGenreInData(data, genreParam);
 
     if (selectedGenreData) {
         const subgenreCount = countSubgenres(selectedGenreData);
-        
-        // Afficher le nombre de sous-genres
-        d3.select('body').append('div')
-            .attr('id', 'subgenreCount')
+        selectorContainer = d3.select('#subgenreCount')
             .style('font-size', '1.5em')
             .text(`Nombre de sous-genres pour ${selectedGenreData.genre}: ${subgenreCount}`);
     }
@@ -207,7 +243,7 @@ d3.json('sous-genre.json').then(data => {
     let findAllParentsData = findAllParents(data, genreParam);
 
 
-    const svg = d3.select('body')
+    const svg = d3.select('#visualization-container')
         .append('svg')
         .attr('width', width)
         .attr('height', height)

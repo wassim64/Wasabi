@@ -87,3 +87,16 @@ body {
     font-weight: bold;
     color: #ff0000 !important;
 }
+
+#genre-selector-root {
+    position: fixed;
+    right: 20px;
+    top: 100px;
+    width: 18%;
+    background-color: white;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
