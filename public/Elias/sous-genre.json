@@ -1,0 +1,947 @@
+[
+    {
+        "genre": "hip hop",
+        "subgenres": [
+            {
+                "genre": "rap",
+                "subgenres": [
+                    "gangsta rap",
+                    "boom bap",
+                    "g-funk",
+                    "political hip hop",
+                    "alternative hip hop",
+                    "underground hip hop",
+                    "australian hip hop",
+                    "midwest rap",
+                    "latin hip hop",
+                    "christian hip hop",
+                    "french hip hop",
+                    "country rap",
+                    "j-rap"
+                ]
+            },
+            {
+                "genre": "trap",
+                "subgenres": [
+                    "trap",
+                    "hardcore hip hop",
+                    "experimental hip hop"
+                ]
+            },
+            {
+                "genre": "style régional",
+                "subgenres": [
+                    "east coast hip hop",
+                    "west coast hip hop",
+                    "southern hip hop"
+                ]
+            },
+            {
+                "genre": "autre style de hip hop",
+                "subgenres": [
+                    "nerdcore hip hop",
+                    "canadian hip hop",
+                    "hip house"
+                ]
+            }
+        ]
+    },
+    {
+        "genre": "rock",
+        "subgenres": [
+            {
+                "genre": "rock classique",
+                "subgenres": [
+                    "hard rock",
+                    "classic rock",
+                    "southern rock",
+                    "rock 'n' roll",
+                    "heartland rock",
+                    "country rock",
+                    "rockabilly"
+                ]
+            },
+            {
+                "genre": "rock alternatif",
+                "subgenres": [
+                    "alternative rock",
+                    "indie rock",
+                    "punk rock",
+                    "post-grunge",
+                    "garage rock",
+                    "rock against communism",
+                    "crack rock steady",
+                    "art rock",
+                    "jam band",
+                    "modern rock",
+                    "grunge",
+                    "post-punk revival",
+                    "riot grrrl",
+                    "art punk"
+                ]
+            },
+            {
+                "genre": "rock progressif",
+                "subgenres": [
+                    "progressive rock",
+                    "neo-progressive rock",
+                    "symphonic rock",
+                    "space rock",
+                    "math rock"
+                ]
+            },
+            {
+                "genre": "rock électrique",
+                "subgenres": [
+                    "industrial rock",
+                    "electronic rock",
+                    "dance-rock",
+                    "funk rock",
+                    "noise rock",
+                    "acid rock",
+                    "new wave"
+                ]
+            },
+            {
+                "genre": "rock psychédélique et féerique",
+                "subgenres": [
+                    "psychedelic rock",
+                    "folk rock",
+                    "gothic rock",
+                    "shoegazing",
+                    "experimental rock",
+                    "krautrock",
+                    "psychédélique"
+                ]
+            },
+            {
+                "genre": "rock métallique",
+                "subgenres": [
+                    "dark rock",
+                    "deathrock",
+                    "stoner rock",
+                    "crossover thrash",
+                    "nwobhm",
+                    "protopunk"
+                ]
+            },
+            {
+                "genre": "autres styles de rock",
+                "subgenres": [
+                    "c",
+                    "soft rock",
+                    "j-rock",
+                    "christian rock",
+                    "glam rock",
+                    "rock opera",
+                    "rock en español",
+                    "celtic rock",
+                    "melodic hardcore",
+                    "surf rock",
+                    "brazilian rock",
+                    "latin rock",
+                    "turkish rock",
+                    "piano rock",
+                    "roots rock",
+                    "swiss rock",
+                    "pub rock",
+                    "alpine rock",
+                    "raw rock",
+                    "instrumental rock",
+                    "skiffle",
+                    "british invasion",
+                    "surf",
+                    "j-punk",
+                    "deutschrock",
+                    "zeuhl",
+                    "rio",
+                    "progg",
+                    "alpine new wave",
+                    "comedy rock",
+                    "post-rock",
+                    "alternative dance"
+                ]
+            }
+        ]
+    },
+    {
+        "genre": "metal",
+        "subgenres": [
+            {
+                "genre": "metal extrême",
+                "subgenres": [
+                    "death metal",
+                    "thrash metal",
+                    "black metal",
+                    "doom metal",
+                    "power metal",
+                    "symphonic metal",
+                    "progressive metal",
+                    "gothic metal",
+                    "speed metal",
+                    "melodic death metal",
+                    "brutal death metal",
+                    "metalcore",
+                    "christian metal",
+                    "viking metal",
+                    "nu metal",
+                    "djent",
+                    "alternative metal",
+                    "death 'n' roll",
+                    "sludge metal",
+                    "groove metal",
+                    "technical death metal",
+                    "progressive death metal",
+                    "martial industrial",
+                    "avant-garde metal",
+                    "extreme metal",
+                    "melodic metalcore",
+                    "unblack metal",
+                    "symphonic black metal"
+                ]
+            },
+            {
+                "genre": "metal éclectique",
+                "subgenres": [
+                    "rap metal",
+                    "folk metal",
+                    "pagan metal",
+                    "dark metal",
+                    "glam metal",
+                    "post-metal",
+                    "southern metal",
+                    "industrial metal",
+                    "heavy metal",
+                    "funk metal",
+                    "ska punk",
+                    "crossover",
+                    "goregrind",
+                    "aggrotech",
+                    "christian hardcore",
+                    "grime",
+                    "cowpunk",
+                    "pirate metal"
+                ]
+            }
+        ]
+    },
+    {
+        "genre": "electronic",
+        "subgenres": [
+            {
+                "genre": "musique électronique traditionnelle",
+                "subgenres": [
+                    "edm",
+                    "house",
+                    "trance",
+                    "drum and bass",
+                    "dubstep",
+                    "electroclash",
+                    "techno",
+                    "industrial",
+                    "downtempo",
+                    "chillwave",
+                    "electro house",
+                    "goa trance",
+                    "nu-disco",
+                    "big beat",
+                    "acid techno",
+                    "ambient",
+                    "glitch",
+                    "idm",
+                    "electro",
+                    "drumstep",
+                    "hardstyle",
+                    "electronicore",
+                    "electropunk",
+                    "breakbeat",
+                    "futurepop",
+                    "electro-industrial",
+                    "new jack swing",
+                    "dance punk",
+                    "tech house",
+                    "rave",
+                    "lo-fi",
+                    "acid house",
+                    "hard trance",
+                    "dark electro",
+                    "chiptune",
+                    "vocal trance",
+                    "happy hardcore",
+                    "drone doom",
+                    "power noise",
+                    "minimal techno",
+                    "eurodance",
+                    "electronica",
+                    "digital hardcore",
+                    "deep house",
+                    "chill-out",
+                    "glitch hop",
+                    "disco house",
+                    "progressive house",
+                    "progressive trance",
+                    "eurobeat",
+                    "gabber",
+                    "hi-nrg",
+                    "french house"
+                ]
+            },
+            {
+                "genre": "électronique éclectique",
+                "subgenres": [
+                    "disco",
+                    "dance"
+                ]
+            },
+            {
+                "genre": "électronique ambiante",
+                "subgenres": [
+                    "ambient",
+                    "drone doom",
+                    "chillwave",
+                    "downtempo"
+                ]
+            },
+            {
+                "genre": "électronique expérimentale",
+                "subgenres": [
+                    "glitch",
+                    "idm",
+                    "electropunk",
+                    "acid techno",
+                    "digital hardcore"
+                ]
+            },
+            {
+                "genre": "électronique de fête",
+                "subgenres": [
+                    "edm",
+                    "house",
+                    "hardstyle",
+                    "gabber",
+                    "vocal trance"
+                ]
+            },
+            {
+                "genre": "électronique nostalgique",
+                "subgenres": [
+                    "nu-disco",
+                    "chiptune",
+                    "new jack swing",
+                    "french house"
+                ]
+            }
+        ]
+    },
+    {
+        "genre": "folk",
+        "subgenres": [
+            {
+                "genre": "folk traditionnel",
+                "subgenres": [
+                    "celtic folk",
+                    "irish folk",
+                    "native american",
+                    "polka",
+                    "volkslied",
+                    "volksmusik",
+                    "música popular portuguesa"
+                ]
+            },
+            {
+                "genre": "folk contemporain",
+                "subgenres": [
+                    "contemporary folk",
+                    "indie folk",
+                    "folk rock",
+                    "electric folk",
+                    "americana",
+                    "folk punk",
+                    "neofolk",
+                    "progressive folk"
+                ]
+            },
+            {
+                "genre": "folk psychédélique",
+                "subgenres": [
+                    "psychedelic folk",
+                    "psych folk",
+                    "freak folk"
+                ]
+            },
+            {
+                "genre": "folk mondiale",
+                "subgenres": [
+                    "baião",
+                    "candombe",
+                    "mariachi",
+                    "trova",
+                    "bandanejo",
+                    "regional mexican",
+                    "grupero"
+                ]
+            },
+            {
+                "genre": "folk expérimental",
+                "subgenres": [
+                    "filk",
+                    "anti-folk",
+                    "folktronica",
+                    "gypsy punk"
+                ]
+            },
+            {
+                "genre": "folk historique",
+                "subgenres": [
+                    "medieval folk rock",
+                    "minnesang",
+                    "roots"
+                ]
+            },
+            {
+                "genre": "folk progressif",
+                "subgenres": [
+                    "progressive bluegrass",
+                    "lounge music"
+                ]
+            },
+            {
+                "genre": "autre style de folk",
+                "subgenres": [
+                    "italian folk",
+                    "mystic folk",
+                    "volkstümlich",
+                    "bluegrass"
+                ]
+            }
+        ]
+    },
+    {
+        "genre": "jazz",
+        "subgenres": [
+            {
+                "genre": "jazz traditionnel",
+                "subgenres": [
+                    "ragtime",
+                    "swing",
+                    "new orleans rhythm and blues",
+                    "boogie woogie",
+                    "gypsy jazz"
+                ]
+            },
+            {
+                "genre": "jazz moderne",
+                "subgenres": [
+                    "smooth jazz",
+                    "contemporary jazz",
+                    "soul jazz",
+                    "cool jazz",
+                    "hard bop",
+                    "bebop",
+                    "free jazz",
+                    "latin jazz",
+                    "jazz fusion",
+                    "vocal jazz",
+                    "nu jazz",
+                    "acid jazz"
+                ]
+            },
+            {
+                "genre": "jazz électrique et fusion",
+                "subgenres": [
+                    "jazz-funk",
+                    "indietronica",
+                    "trip hop"
+                ]
+            },
+            {
+                "genre": "jazz vocal et soul",
+                "subgenres": [
+                    "r&b",
+                    "soul",
+                    "gospel",
+                    "chill-out"
+                ]
+            },
+            {
+                "genre": "jazz expérimental",
+                "subgenres": [
+                    "free jazz",
+                    "ethereal wave",
+                    "dark cabaret"
+                ]
+            },
+            {
+                "genre": "jazz et influences diverses",
+                "subgenres": [
+                    "funk",
+                    "flamenco"
+                ]
+            }
+        ]
+    },
+    {
+        "genre": "punk",
+        "subgenres": [
+            {
+                "genre": "punk classique",
+                "subgenres": [
+                    "hardcore punk",
+                    "street punk",
+                    "garage punk",
+                    "oi-punk"
+                ]
+            },
+            {
+                "genre": "punk mélodique",
+                "subgenres": [
+                    "pop punk",
+                    "skate punk",
+                    "punkabilly"
+                ]
+            },
+            {
+                "genre": "punk expérimental",
+                "subgenres": [
+                    "post-punk",
+                    "punk cabaret",
+                    "punk blues",
+                    "screamo",
+                    "psychobilly"
+                ]
+            },
+            {
+                "genre": "punk alternatif",
+                "subgenres": [
+                    "anarcho-punk",
+                    "crust punk",
+                    "deutschpunk",
+                    "celtic punk",
+                    "horror punk"
+                ]
+            }
+        ]
+    },
+    {
+        "genre": "pop",
+        "subgenres": [
+            {
+                "genre": "pop traditionnel",
+                "subgenres": [
+                    "doo-wop",
+                    "bubblegum pop",
+                    "classic pop",
+                    "teen pop"
+                ]
+            },
+            {
+                "genre": "pop électronique",
+                "subgenres": [
+                    "electropop",
+                    "synthpop",
+                    "dance-pop",
+                    "electro swing",
+                    "italo disco"
+                ]
+            },
+            {
+                "genre": "pop alternatif",
+                "subgenres": [
+                    "indie pop",
+                    "art pop",
+                    "avant-pop",
+                    "dream pop",
+                    "noise pop",
+                    "jangle pop",
+                    "alternative rock",
+                    "progressive rock"
+                ]
+            },
+            {
+                "genre": "pop mondiale",
+                "subgenres": [
+                    "c-pop",
+                    "j-pop",
+                    "k-pop",
+                    "britpop",
+                    "cantopop",
+                    "mandopop",
+                    "nederpop",
+                    "francophone",
+                    "latin pop"
+                ]
+            },
+            {
+                "genre": "pop fusion",
+                "subgenres": [
+                    "pop rock",
+                    "power pop",
+                    "country pop",
+                    "pop-folk",
+                    "pop-rap",
+                    "rap metal"
+                ]
+            },
+            {
+                "genre": "pop contemporaine",
+                "subgenres": [
+                    "adult contemporary",
+                    "contemporary r&b",
+                    "blue-eyed soul",
+                    "vocal"
+                ]
+            },
+            {
+                "genre": "pop expérimentale",
+                "subgenres": [
+                    "dark wave",
+                    "neue deutsche welle",
+                    "neue deutsche todeskunst",
+                    "shibuya-kei",
+                    "psychedelic pop",
+                    "operatic pop",
+                    "baroque pop"
+                ]
+            },
+            {
+                "genre": "pop historiques",
+                "subgenres": [
+                    "french pop",
+                    "yé-yé",
+                    "schlager",
+                    "chanson"
+                ]
+            },
+            {
+                "genre": "autres styles de pop",
+                "subgenres": [
+                    "bubblegum dance",
+                    "sunshine pop",
+                    "modern classical",
+                    "freestyle",
+                    "new rave",
+                    "austropop",
+                    "europop",
+                    "adult alternative",
+                    "indie"
+                ]
+            }
+        ]
+    },
+    {
+        "genre": "reggae",
+        "subgenres": [
+            {
+                "genre": "reggae traditionnel",
+                "subgenres": [
+                    "roots reggae",
+                    "rocksteady",
+                    "ska"
+                ]
+            },
+            {
+                "genre": "reggae électronique",
+                "subgenres": [
+                    "dub",
+                    "reggae fusion",
+                    "dancehall",
+                    "ragga"
+                ]
+            },
+            {
+                "genre": "autres styles de reggae",
+                "subgenres": [
+                    "dub poetry",
+                    "reggae rock"
+                ]
+            }
+        ]
+    },
+    {
+        "genre": "blues",
+        "subgenres": [
+            {
+                "genre": "blues traditionnel",
+                "subgenres": [
+                    "delta blues",
+                    "country blues",
+                    "chicago blues",
+                    "harmonica blues"
+                ]
+            },
+            {
+                "genre": "blues électrique",
+                "subgenres": [
+                    "electric blues",
+                    "blues rock",
+                    "jump blues"
+                ]
+            },
+            {
+                "genre": "blues fusion",
+                "subgenres": [
+                    "soul blues",
+                    "dirty blues",
+                    "swamp blues"
+                ]
+            }
+        ]
+    },
+    {
+        "genre": "world",
+        "subgenres": [
+            {
+                "genre": "musique afro",
+                "subgenres": [
+                    "afrobeat",
+                    "bhangra",
+                    "zydeco",
+                    "calypso"
+                ]
+            },
+            {
+                "genre": "musique latine",
+                "subgenres": [
+                    "cumbia",
+                    "samba",
+                    "reggaeton",
+                    "son cubano",
+                    "forró",
+                    "salsa",
+                    "tango",
+                    "bossa nova",
+                    "samba-canção",
+                    "pagode",
+                    "tropicalismo",
+                    "ranchera",
+                    "tejano",
+                    "bolero",
+                    "rumba",
+                    "merengue",
+                    "bossa nova",
+                    "bachata",
+                    "norteño",
+                    "tropicálismo",
+                    "brazilian",
+                    "mpb",
+                    "funk carioca"
+                ]
+            },
+            {
+                "genre": "musique celtique",
+                "subgenres": [
+                    "celtic",
+                    "fado",
+                    "klezmer"
+                ]
+            },
+            {
+                "genre": "musique de la diaspora",
+                "subgenres": [
+                    "trova",
+                    "morna",
+                    "jovem guarda",
+                    "milonga",
+                    "sertanejo",
+                    "banda",
+                    "cuarteto"
+                ]
+            },
+            {
+                "genre": "autres styles de world",
+                "subgenres": [
+                    "worldbeat",
+                    "andalusian rock",
+                    "brega",
+                    "lambada",
+                    "world music",
+                    "latin",
+                    "axé"
+                ]
+            }
+        ]
+    },
+    {
+        "genre": "core",
+        "subgenres": [
+            {
+                "genre": "metalcore",
+                "subgenres": [
+                    "melodic metalcore",
+                    "deathcore"
+                ]
+            },
+            {
+                "genre": "hardcore",
+                "subgenres": [
+                    "hardcore",
+                    "powerviolence",
+                    "thrashcore",
+                    "post-hardcore",
+                    "hatecore",
+                    "mathcore",
+                    "grindcore"
+                ]
+            },
+            {
+                "genre": "rapcore et équivalents",
+                "subgenres": [
+                    "crunkcore",
+                    "rapcore",
+                    "horrorcore"
+                ]
+            },
+            {
+                "genre": "core expérimental",
+                "subgenres": [
+                    "breakcore",
+                    "nintendocore",
+                    "speedcore",
+                    "queercore"
+                ]
+            }
+        ]
+    },
+    {
+        "genre": "experimental",
+        "subgenres": [
+            {
+                "genre": "musique avant-gardiste",
+                "subgenres": [
+                    "avant-garde",
+                    "post-industrial",
+                    "psychedelic",
+                    "neo-psychedelia"
+                ]
+            },
+            {
+                "genre": "musique ambiante et drone",
+                "subgenres": [
+                    "dark ambient",
+                    "drone music",
+                    "slam"
+                ]
+            },
+            {
+                "genre": "musique de film et télévision",
+                "subgenres": [
+                    "soundtrack/musical",
+                    "soundtrack/television"
+                ]
+            },
+            {
+                "genre": "genres de bruit et trip hop",
+                "subgenres": [
+                    "noise",
+                    "trip hop",
+                    "indietronica"
+                ]
+            },
+            {
+                "genre": "chamber et nouvelles expérimentations",
+                "subgenres": [
+                    "chamber music",
+                    "beat",
+                    "43:40",
+                    "new age"
+                ]
+            },
+            {
+                "genre": "autres expérimentations",
+                "subgenres": [
+                    "zeuhl"
+                ]
+            }
+        ]
+    },
+    {
+        "genre": "country",
+        "subgenres": [
+            "honky tonk",
+            "alternative country",
+            "outlaw country",
+            "bakersfield sound"
+        ]
+    },
+    {
+        "genre": "christian",
+        "subgenres": [
+            "contemporary christian",
+            "southern gospel",
+            "christian ska",
+            "worship"
+        ]
+    },
+    {
+        "genre": "soul/r&b",
+        "subgenres": [
+            "neo soul",
+            "quiet storm"
+        ]
+    },
+    {
+        "genre": "classical",
+        "subgenres": [
+            "gregorian chant",
+            "choral",
+            "neoclassical"
+        ]
+    },
+    {
+        "genre": "miscellaneous",
+        "subgenres": [
+            "children's music",
+            "comedy",
+            "novelty",
+            "mashup",
+            "spoken word",
+            "protest song",
+            "soundtrack",
+            "opera",
+            "musical",
+            "vaudeville",
+            "sung poetry",
+            "humppa",
+            "hawaiian",
+            "easy listening",
+            "big band",
+            "slowcore",
+            "mixed",
+            "junkanoo",
+            "experimental pop",
+            "ballad",
+            "comic opera",
+            "a cappella",
+            "early music",
+            "visual kei",
+            "anime",
+            "pimba",
+            "hamburger schule",
+            "outisder music",
+            "religious",
+            "outsider music",
+            "parody",
+            "beatbox",
+            "emo",
+            "steampunk",
+            "minimal",
+            "orchestral",
+            "psychedelic trance",
+            "medieval",
+            "acoustic",
+            "cabaret",
+            "crunk",
+            "funk melody",
+            "canterbury",
+            "neue deutsche härte",
+            "singer-songwriter",
+            "oldies",
+            "unk",
+            "soca",
+            "ebm",
+            "gothic",
+            "christian punk",
+            "christmas"
+        ]
+    }
+]
