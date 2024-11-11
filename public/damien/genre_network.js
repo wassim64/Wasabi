@@ -1,27 +1,18 @@
-// Variables globales
 let originalData;
 let currentData;
 let simulation;
 let transform = d3.zoomIdentity;
 let availableYears = new Set();
 let availableCountries = new Set();
-
-// Dimensions et configuration
 const width = 1200;
 const height = 800;
 const nodeRadius = 10;
 const maxLinkWidth = 10;
-
-// Créer le SVG
 const svg = d3.select('#chart')
     .append('svg')
     .attr('width', width)
     .attr('height', height);
-
-// Ajouter un groupe pour le zoom
 const g = svg.append('g');
-
-// Configurer le zoom
 const zoom = d3.zoom()
     .scaleExtent([0.1, 4])
     .on('zoom', function() {
@@ -31,7 +22,7 @@ const zoom = d3.zoom()
 
 svg.call(zoom);
 
-// Ajouter une variable pour le tooltip des liens
+
 const linkTooltip = d3.select('body')
     .append('div')
     .attr('class', 'link-tooltip')
@@ -42,14 +33,11 @@ function loadData() {
     d3.json('genre_network.json').then(data => {
         originalData = data;
         currentData = JSON.parse(JSON.stringify(data));
-        
-        // Collecter les années et pays disponibles
         data.nodes.forEach(node => {
             Object.keys(node.years).forEach(year => availableYears.add(parseInt(year)));
             Object.keys(node.countries).forEach(country => availableCountries.add(country));
         });
 
-        // Initialiser le menu déroulant des genres
         const genreSelect = document.getElementById('genreSelect');
         const genres = data.nodes.map(n => n.id).sort();
         genres.forEach(genre => {
@@ -57,25 +45,19 @@ function loadData() {
             option.value = option.text = genre;
             genreSelect.add(option);
         });
-
-        // Initialiser les sélecteurs
         initializeFilters();
         updateVisualization();
         setupEventListeners();
     });
 }
 
-// Fonction pour initialiser les filtres
 function initializeFilters() {
-    // Années
     const yearStart = document.getElementById('yearStart');
     const yearEnd = document.getElementById('yearEnd');
     yearStart.min = Math.min(...availableYears);
     yearStart.max = Math.max(...availableYears);
     yearEnd.min = yearStart.min;
     yearEnd.max = yearStart.max;
-
-    // Pays
     const countrySelect = document.getElementById('countrySelect');
     Array.from(availableCountries).sort().forEach(country => {
         const option = document.createElement('option');
@@ -86,10 +68,7 @@ function initializeFilters() {
 
 // Fonction pour mettre à jour la visualisation
 function updateVisualization() {
-    // Nettoyer la visualisation existante
     g.selectAll('*').remove();
-
-    // Définir les échelles en premier
     const linkScale = d3.scaleLinear()
         .domain([0, d3.max(currentData.links, d => d.weight)])
         .range([1, maxLinkWidth]);
@@ -97,8 +76,6 @@ function updateVisualization() {
     const nodeScale = d3.scaleLinear()
         .domain([0, d3.max(currentData.nodes, d => d.songCount)])
         .range([5, 20]);
-
-    // Créer la simulation de force avec nodeScale maintenant disponible
     simulation = d3.forceSimulation(currentData.nodes)
         .force('link', d3.forceLink(currentData.links)
             .id(d => d.id)
@@ -111,7 +88,6 @@ function updateVisualization() {
         .force('x', d3.forceX(width / 2).strength(0.1))
         .force('y', d3.forceY(height / 2).strength(0.1));
 
-    // Dessiner les liens
     const link = g.append('g')
         .selectAll('line')
         .data(currentData.links)
@@ -120,12 +96,10 @@ function updateVisualization() {
         .attr('stroke', '#999')
         .attr('stroke-opacity', 0.6)
         .on('mouseover', function(d) {
-            // Mettre en surbrillance le lien
             d3.select(this)
                 .attr('stroke', '#ff4444')
                 .attr('stroke-opacity', 1);
             
-            // Afficher le tooltip
             linkTooltip.transition()
                 .duration(200)
                 .style('opacity', .9);
@@ -138,7 +112,6 @@ function updateVisualization() {
                 .style('top', (d3.event.pageY - 28) + 'px');
         })
         .on('mouseout', function() {
-            // Remettre le lien en état normal sauf si sélectionné
             if (!d3.select(this).classed('selected')) {
                 d3.select(this)
                     .attr('stroke', '#999')
@@ -150,18 +123,13 @@ function updateVisualization() {
                 .style('opacity', 0);
         })
         .on('click', function(d) {
-            // Retirer la sélection précédente
             d3.selectAll('line').classed('selected', false)
                 .attr('stroke', '#999')
                 .attr('stroke-opacity', 0.6);
-            
-            // Sélectionner ce lien
             d3.select(this)
                 .classed('selected', true)
                 .attr('stroke', '#ff4444')
                 .attr('stroke-opacity', 1);
-            
-            // Mettre à jour le panneau de détails
             const sourceGenre = d.source.id || d.source;
             const targetGenre = d.target.id || d.target;
             const sourceNode = currentData.nodes.find(n => n.id === sourceGenre);
@@ -186,7 +154,6 @@ function updateVisualization() {
             `;
         });
 
-    // Dessiner les nœuds
     const node = g.append('g')
         .selectAll('g')
         .data(currentData.nodes)
@@ -196,21 +163,18 @@ function updateVisualization() {
             .on('drag', dragged)
             .on('end', dragended));
 
-    // Ajouter les cercles aux nœuds
     node.append('circle')
         .attr('r', d => nodeScale(d.songCount))
         .attr('fill', d => d3.schemeCategory10[d.id.length % 10])
         .attr('stroke', '#fff')
         .attr('stroke-width', 1.5);
 
-    // Ajouter les labels
     node.append('text')
         .text(d => d.id)
         .attr('x', 12)
         .attr('y', 3)
         .attr('font-size', '10px');
 
-    // Tooltip
     const tooltip = d3.select('body').append('div')
         .attr('class', 'tooltip')
         .style('opacity', 0);
@@ -239,12 +203,10 @@ function updateVisualization() {
         
         const contextMenu = document.getElementById('nodeContextMenu');
         
-        // Positionner et afficher le menu
         contextMenu.style.display = 'block';
         contextMenu.style.left = `${d3.event.pageX}px`;
         contextMenu.style.top = `${d3.event.pageY}px`;
-        
-        // Gérer les actions du menu
+
         document.getElementById('focusNode').onclick = () => {
             document.getElementById('genreSelect').value = d.id;
             filterByGenre(d.id);
@@ -254,29 +216,28 @@ function updateVisualization() {
         document.getElementById('redirectTimeline').onclick = () => {
             const yearStart = document.getElementById('yearStart').value;
             const yearEnd = document.getElementById('yearEnd').value;
-            window.location.href = `/Wasabi/public/timeline.html?genre=${d.id}&start=${yearStart}&end=${yearEnd}`;
+            window.location.href = `/public/wassim/choroplethMap.html?genre=${d.id}&start=${yearStart}&end=${yearEnd}`;
         };
 
         document.getElementById('redirectNetwork').onclick = () => {
             const yearStart = document.getElementById('yearStart').value;
             const yearEnd = document.getElementById('yearEnd').value;
-            window.location.href = `/Wasabi/public/network.html?genre=${d.id}&start=${yearStart}&end=${yearEnd}`;
+            window.location.href = `/public/romain/boxDiagram.html?genre=${d.id}&start=${yearStart}&end=${yearEnd}`;
         };
 
         document.getElementById('redirectBubble').onclick = () => {
             const yearStart = document.getElementById('yearStart').value;
             const yearEnd = document.getElementById('yearEnd').value;
-            window.location.href = `/Wasabi/public/bubble.html?genre=${d.id}&start=${yearStart}&end=${yearEnd}`;
+            window.location.href = `/public/elias/index.html?genre=${d.id}&start=${yearStart}&end=${yearEnd}`;
         };
 
         document.getElementById('redirectWordcloud').onclick = () => {
             const yearStart = document.getElementById('yearStart').value;
             const yearEnd = document.getElementById('yearEnd').value;
-            window.location.href = `/Wasabi/public/wordcloud.html?genre=${d.id}&start=${yearStart}&end=${yearEnd}`;
+            window.location.href = `/public/karim/index.html?genre=${d.id}&start=${yearStart}&end=${yearEnd}`;
         };
     });
 
-    // Mise à jour de la simulation
     simulation.nodes(currentData.nodes)
         .on('tick', () => {
             link
@@ -301,7 +262,6 @@ function filterByGenre(centralGenre) {
     const minSongs = parseInt(document.getElementById('minSongs').value);
     const minArtists = parseInt(document.getElementById('minArtists').value);
 
-    // Trouver les genres connectés jusqu'à la profondeur spécifiée
     let includedGenres = new Set([centralGenre]);
     let currentDepth = 0;
     let frontier = new Set([centralGenre]);
@@ -311,7 +271,6 @@ function filterByGenre(centralGenre) {
         frontier.forEach(genre => {
             originalData.links
                 .filter(link => {
-                    // Correction de la comparaison des liens
                     const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
                     const targetId = typeof link.target === 'object' ? link.target.id : link.target;
                     return ((sourceId === genre || targetId === genre) && 
@@ -331,14 +290,12 @@ function filterByGenre(centralGenre) {
         currentDepth++;
     }
 
-    // Filtrer les nœuds
     currentData.nodes = originalData.nodes
         .filter(node => 
             includedGenres.has(node.id) && 
             node.songCount >= minSongs && 
             node.artistCount >= minArtists);
 
-    // Filtrer les liens
     currentData.links = originalData.links
         .filter(link => {
             const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
@@ -348,7 +305,6 @@ function filterByGenre(centralGenre) {
                    link.weight >= minConnections;
         });
 
-    // Redémarrer la simulation avec les nouvelles données
     if (simulation) {
         simulation.stop();
     }
@@ -357,24 +313,17 @@ function filterByGenre(centralGenre) {
 
 // Configuration des écouteurs d'événements
 function setupEventListeners() {
-    // Genre sélectionné
     document.getElementById('genreSelect').addEventListener('change', function(e) {
         filterByGenre(e.target.value);
     });
-
-    // Profondeur
     document.getElementById('depthRange').addEventListener('input', function(e) {
         document.getElementById('depthValue').textContent = e.target.value;
         filterByGenre(document.getElementById('genreSelect').value);
     });
-
-    // Connexions minimum
     document.getElementById('minConnections').addEventListener('input', function(e) {
         document.getElementById('connectionsValue').textContent = e.target.value;
         filterByGenre(document.getElementById('genreSelect').value);
     });
-
-    // Filtres minimum
     document.getElementById('minSongs').addEventListener('change', function() {
         filterByGenre(document.getElementById('genreSelect').value);
     });
@@ -382,8 +331,6 @@ function setupEventListeners() {
     document.getElementById('minArtists').addEventListener('change', function() {
         filterByGenre(document.getElementById('genreSelect').value);
     });
-
-    // Réinitialisation
     document.getElementById('resetFilters').addEventListener('click', function() {
         document.getElementById('depthRange').value = 2;
         document.getElementById('depthValue').textContent = 2;
@@ -412,13 +359,9 @@ function setupEventListeners() {
     function filterByYearRange() {
         const yearStart = parseInt(document.getElementById('yearStart').value);
         const yearEnd = parseInt(document.getElementById('yearEnd').value);
-        
-        // Filtrer les nœuds en fonction des années
         currentData.nodes = originalData.nodes.map(node => {
             const filteredNode = {...node};
             let newSongCount = 0;
-            
-            // Calculer le nouveau songCount pour la période
             Object.entries(node.years).forEach(([year, count]) => {
                 const yearNum = parseInt(year);
                 if (yearNum >= yearStart && yearNum <= yearEnd) {
@@ -428,22 +371,15 @@ function setupEventListeners() {
             
             filteredNode.songCount = newSongCount;
             return filteredNode;
-        }).filter(node => node.songCount > 0); // Garder uniquement les nœuds avec des chansons
+        }).filter(node => node.songCount > 0);
     
-        // Créer un Set des IDs des nœuds actifs
         const activeNodeIds = new Set(currentData.nodes.map(n => n.id));
-    
-        // Filtrer les liens pour ne garder que ceux entre les nœuds actifs
         currentData.links = originalData.links.filter(link => {
             return activeNodeIds.has(link.source.id || link.source) && 
                    activeNodeIds.has(link.target.id || link.target);
         });
-    
-        // Réinitialiser la simulation avec les nouvelles données
         simulation.nodes(currentData.nodes);
         simulation.force('link').links(currentData.links);
-        
-        // Redémarrer la simulation en douceur
         simulation.alpha(0.3).restart();
         
         updateVisualization();
@@ -468,7 +404,6 @@ function dragended(d) {
     d.fy = null;
 }
 
-// Ajouter un gestionnaire pour fermer le menu contextuel
 document.addEventListener('click', function(event) {
     const contextMenu = document.getElementById('nodeContextMenu');
     if (!contextMenu.contains(event.target)) {
@@ -476,5 +411,4 @@ document.addEventListener('click', function(event) {
     }
 });
 
-// Appeler loadData pour initialiser
 loadData();
