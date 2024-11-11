@@ -229,7 +229,7 @@ d3.json('sous-genre.json').then(data => {
                 window.location.href = `/public/romain/boxDiagram.html?genre=${d.data.name}&start=${yearStart}&end=${yearEnd}`;
             };
 
-            document.getElementById('redirectBubble').onclick = () => {
+            document.getElementById('redirectGenre').onclick = () => {
                 const yearStart = new URLSearchParams(window.location.search).get('start');
                 const yearEnd = new URLSearchParams(window.location.search).get('end');
                 window.location.href = `/public/elias/index.html?genre=${d.data.name}&start=${yearStart}&end=${yearEnd}`;
@@ -240,19 +240,13 @@ d3.json('sous-genre.json').then(data => {
                 const yearEnd = new URLSearchParams(window.location.search).get('end');
                 window.location.href = `/public/karim/index.html?genre=${d.data.name}&start=${yearStart}&end=${yearEnd}`;
             };
+
+            document.getElementById('close').onclick = () => {
+                const menu = document.getElementById("nodeContextMenu");
+                if ( menu.style.display=="block") {
+                    menu.style.display = "none";
+                }
+            };
         });
 
-        let twice = false;
-        document.addEventListener('click', function(event) {
-            const contextMenu = document.getElementById('nodeContextMenu');
-            if (twice && contextMenu.style.display === 'block' && !contextMenu.contains(event.target)) {
-                contextMenu.style.display = 'none';
-                twice = false;
-            } else {
-                if (contextMenu.style.display === 'none') {
-                    contextMenu.style.display = 'block';
-                }
-                twice = true;
-            }
-        });
 });

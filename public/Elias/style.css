@@ -83,3 +83,8 @@ body {
 .menu-item:hover {
     background: #f5f5f5;
 }
+
+#redirectGenre{
+    font-weight: bold;
+    color: #ff0000 !important;
+}
