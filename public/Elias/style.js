@@ -191,15 +191,15 @@ d3.json('sous-genre.json').then(data => {
         // Afficher le nombre de sous-genres
         d3.select('body').append('div')
             .attr('id', 'subgenreCount')
-            .style('font-size', '45px')
+            .style('font-size', '1.5em')
             .text(`Nombre de sous-genres pour ${selectedGenreData.genre}: ${subgenreCount}`);
     }
 
 
-    const width = window.innerWidth;
-    const height = window.innerHeight * 1.5;
+    const width = window.innerWidth ;
+    const height = window.innerHeight *1.5 ;
     const tree = d3.tree()
-        .size([height, width / 1.5])
+        .size([height, width /1.6])
         .separation((a, b) => a.parent === b.parent ? 10 : 10);
 
     const hierarchy = d3.hierarchy(transformedData);
@@ -211,7 +211,7 @@ d3.json('sous-genre.json').then(data => {
         .append('svg')
         .attr('width', width)
         .attr('height', height)
-        .style("transform", "scale(0.7) translateY(-700px)");
+        .style("transform", "scale(0.7) ");
 
     const link = svg.selectAll('.link')
         .data(root_node.links())
@@ -232,14 +232,14 @@ d3.json('sous-genre.json').then(data => {
         .attr('transform', d => `translate(${d.y}, ${d.x})`);
 
     node.append('circle')
-        .attr('r', 20)
+        .attr('r', 3)
         .classed('highlighted', d => VerifParent(d.data.name, findAllParentsData, genreParam));
 
     node.append('text')
-        .attr('dx', 10)
-        .attr('dy', 15)
+        .attr('dx', 5)
+        .attr('dy', 4)
         .style('text-anchor', 'start')
-        .style('font-size', '50px')
+        .style('font-size', '1em')
         .classed('highlighted', d => VerifParent(d.data.name, findAllParentsData, genreParam))
         .text(d => d.data.name)
         .on('click', function(event, d) {
@@ -258,7 +258,7 @@ d3.json('sous-genre.json').then(data => {
             document.getElementById('redirectGenre').onclick = () => {
                 const yearStart = new URLSearchParams(window.location.search).get('start');
                 const yearEnd = new URLSearchParams(window.location.search).get('end');
-                window.location.href = `/public/elias/index.html?genre=${d.data.name}&start=${yearStart}&end=${yearEnd}`;
+                window.location.href = `../Elias/index.html?genre=${d.data.name}&start=${yearStart}&end=${yearEnd}`;
             };
 
             document.getElementById('close').onclick = () => {

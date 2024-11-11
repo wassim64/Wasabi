@@ -76,8 +76,12 @@
 </div>
 <div  id="tooltip"></div>
     <div style="display: flex; flex-direction: column; justify-content: center;align-items: center;font-size: 20px">
-<div id="zeroDifferenceCount"></div>
+        <div id="genreDisplay"></div>
+        <div id="zeroDifferenceCount"></div>
     <div id="averageCareerDuration"></div>
+        <div id="contextMenu" style="display: flex;  background: white; border: 1px solid #ccc; padding: 10px;">
+            <div id="lienKarim">Retourner à l'évolution du genre dans le temps</div>
+        </div>
     </div>
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <style>
@@ -113,6 +117,7 @@
     <span>Axe des X : Nom des artistes</span>
     </div>
 </div>
+
 <script src="boxDiagram.js"></script>
 
 </body>
