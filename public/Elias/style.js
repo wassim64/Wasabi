@@ -3,6 +3,25 @@ function getGenreFromUrl() {
     return params.get("genre");
 }
 
+
+function countSubgenres(genreData) {
+    let count = 0;
+
+    function recursiveCount(subgenres) {
+        subgenres.forEach(subgenre => {
+            if (typeof subgenre === 'string') {
+                count++;
+            } else if (typeof subgenre === 'object') {
+                count++;
+                recursiveCount(subgenre.subgenres);
+            }
+        });
+    }
+
+    recursiveCount(genreData.subgenres);
+    return count;
+}
+
 // Fonction pour rechercher un sous-genre dans les genres
 function findParentGenre(data, subgenreName) {
     for (let genre of data) {
@@ -164,6 +183,18 @@ d3.json('sous-genre.json').then(data => {
         console.error(`Genre ou sous-genre "${genreParam}" non trouvé.`);
         return;
     }
+    const selectedGenreData = findGenreInData(data, genreParam);
+
+    if (selectedGenreData) {
+        const subgenreCount = countSubgenres(selectedGenreData);
+        
+        // Afficher le nombre de sous-genres
+        d3.select('body').append('div')
+            .attr('id', 'subgenreCount')
+            .style('font-size', '45px')
+            .text(`Nombre de sous-genres pour ${selectedGenreData.genre}: ${subgenreCount}`);
+    }
+
 
     const width = window.innerWidth;
     const height = window.innerHeight * 1.5;
@@ -174,6 +205,7 @@ d3.json('sous-genre.json').then(data => {
     const hierarchy = d3.hierarchy(transformedData);
     const root_node = tree(hierarchy);
     let findAllParentsData = findAllParents(data, genreParam);
+
 
     const svg = d3.select('body')
         .append('svg')
@@ -200,7 +232,7 @@ d3.json('sous-genre.json').then(data => {
         .attr('transform', d => `translate(${d.y}, ${d.x})`);
 
     node.append('circle')
-        .attr('r', 4.5)
+        .attr('r', 20)
         .classed('highlighted', d => VerifParent(d.data.name, findAllParentsData, genreParam));
 
     node.append('text')
@@ -223,22 +255,10 @@ d3.json('sous-genre.json').then(data => {
                 window.location.href = `/public/wassim/choroplethMap.html?genre=${d.data.name}&start=${yearStart}&end=${yearEnd}`;
             };
 
-            document.getElementById('redirectNetwork').onclick = () => {
-                const yearStart = new URLSearchParams(window.location.search).get('start');
-                const yearEnd = new URLSearchParams(window.location.search).get('end');
-                window.location.href = `/public/romain/boxDiagram.html?genre=${d.data.name}&start=${yearStart}&end=${yearEnd}`;
-            };
-
             document.getElementById('redirectGenre').onclick = () => {
                 const yearStart = new URLSearchParams(window.location.search).get('start');
                 const yearEnd = new URLSearchParams(window.location.search).get('end');
                 window.location.href = `/public/elias/index.html?genre=${d.data.name}&start=${yearStart}&end=${yearEnd}`;
-            };
-
-            document.getElementById('redirectWordcloud').onclick = () => {
-                const yearStart = new URLSearchParams(window.location.search).get('start');
-                const yearEnd = new URLSearchParams(window.location.search).get('end');
-                window.location.href = `/public/karim/index.html?genre=${d.data.name}&start=${yearStart}&end=${yearEnd}`;
             };
 
             document.getElementById('close').onclick = () => {
