@@ -8,6 +8,7 @@ let data;
 let svg;
 let g;
 let tooltip;
+let contextMenu = null;
 
 // Créer le SVG
 function initializeSVG() {
@@ -206,6 +207,7 @@ function updateChart() {
         .append('g')
         .attr('class', 'legend-item')
         .attr('transform', (d, i) => `translate(0,${i * 25})`);
+        
 
     // Ajouter les rectangles de couleur
     legendItems.append('rect')
@@ -230,7 +232,8 @@ function updateChart() {
             return `${d} (${total} ${label})`;
         })
         .on("mouseover", highlight)
-        .on("mouseleave", noHighlight);
+        .on("mouseleave", noHighlight)
+        .on("click", handleLegendClick);
 
     // Ajouter un fond blanc semi-transparent à la légende
     legendContainer.insert('rect', ':first-child')
@@ -596,4 +599,97 @@ function goBack() {
 
     // Rediriger vers la page de Damien avec les paramètres
     window.location.href = `/public/damien/index.html?${params.toString()}`;
+}
+
+function goToBoxDiagram() {
+    // Récupérer les paramètres actuels
+    const startYear = document.getElementById('startYear').value;
+    const endYear = document.getElementById('endYear').value;
+    const genre = document.getElementById('genreSelect').value;
+
+    // Construire l'URL avec les paramètres
+    const params = new URLSearchParams();
+    if (startYear) params.set('start', startYear);
+    if (endYear) params.set('end', endYear);
+    if (genre) params.set('genre', genre);
+
+    // Rediriger vers la page du diagramme en boîte avec les paramètres
+    window.location.href = `/public/romain/boxDiagram.html?${params.toString()}`;
+}
+
+
+function createContextMenu() {
+    if (!contextMenu) {
+        contextMenu = document.createElement('div');
+        contextMenu.className = 'context-menu';
+        document.body.appendChild(contextMenu);
+    }
+    return contextMenu;
+}
+
+// Modifier la création des éléments de la légende pour ajouter l'événement de clic
+function createLegendItem(genre, color) {
+    const item = document.createElement('div');
+    item.className = 'legend-item';
+    item.innerHTML = `
+        <div class="legend-color" style="background-color: ${color}"></div>
+        <span class="legend-text">${genre}</span>
+    `;
+    
+    item.addEventListener('click', () => handleLegendClick(genre));
+    return item;
+}
+
+function handleLegendClick(genre) {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+    
+    const menu = createContextMenu();
+    
+    // Positionner le menu au niveau du curseur
+    document.addEventListener('mousemove', function moveMenu(e) {
+        menu.style.display = 'block';
+        menu.style.left = (e.pageX - 350) + 'px';
+        menu.style.top = (e.pageY - 40) + 'px';
+        
+        // Supprimer l'écouteur après le premier mouvement
+        document.removeEventListener('mousemove', moveMenu);
+    });
+
+    // Contenu du menu
+    menu.innerHTML = `
+        <div class="context-menu-item" onclick="handleContextMenuClick('${genre}')">
+            <span class="context-menu-icon">📊</span>
+            Voir l'espérance de vie du genre <strong>"${genre}"
+        </div>
+    `;
+
+    // Fermer le menu au clic ailleurs
+    function closeMenu(e) {
+        if (!menu.contains(e.target)) {
+            menu.style.display = 'none';
+            document.removeEventListener('click', closeMenu);
+        }
+    }
+    
+    setTimeout(() => {
+        document.addEventListener('click', closeMenu);
+    }, 0);
+}
+
+function handleContextMenuClick(genre) {
+    // Récupérer les paramètres actuels
+    const startYear = document.getElementById('startYear').value;
+    const endYear = document.getElementById('endYear').value;
+
+    // Construire l'URL avec les paramètres
+    const params = new URLSearchParams();
+    if (startYear) params.set('start', startYear);
+    if (endYear) params.set('end', endYear);
+    params.set('genre', genre); // Toujours inclure le genre sélectionné
+
+    // Rediriger vers la page du diagramme en boîte
+    window.location.href = `/public/romain/boxDiagram.html?${params.toString()}`;
 }
