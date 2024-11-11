@@ -25,6 +25,7 @@ function getEndDateFromURL() {
 
 // Définir la variable genre en haut du fichier
 const genre = getGenreFromURL();
+var averageCareerDuration;
 function loadData() {
     // Charger les données depuis le fichier JSON local
     d3.json("output_songs_by_genre.json").then(data => {
@@ -49,14 +50,14 @@ function loadData() {
         const zeroDifferenceCount = allData.length - withDate.length;
         document.getElementById("zeroDifferenceCount").textContent =
             "Nombre d'artistes avec 1 seul album/son : " + zeroDifferenceCount + " sur " + allData.length + " artistes"
-        +" de l'année "+startDate.getFullYear()+" à l'année "+endDate.getFullYear();
+            +" de l'année "+startDate.getFullYear()+" à l'année "+endDate.getFullYear();
 
-        const averageCareerDuration = calculateAverageCareerDuration(withDate);
+         averageCareerDuration = calculateAverageCareerDuration(withDate);
         document.getElementById("averageCareerDuration").textContent =
             "Durée moyenne de carrière : " + averageCareerDuration.toFixed(1) + " ans"
             +" de l'année "+startDate.getFullYear()+" à l'année "+endDate.getFullYear();
 
-        applyFilter();  // Application du filtre initial
+        applyFilter();  // Passer la moyenne à applyFilter
     }).catch(error => {
         console.error('Error loading data:', error);
     });
@@ -81,8 +82,7 @@ function applyFilter() {
             // Filtrer les artistes dont au moins une date de sortie est dans la plage spécifiée
             return d.all_dates.some(date => {
                 const songDate = new Date(date);
-                var res = songDate >= startDate && songDate <= endDate;
-                return res
+                return songDate >= startDate && songDate <= endDate;
             });
         })
         .filter(d => d.date_difference_years >= minYears && d.date_difference_years <= maxYears)
@@ -91,17 +91,12 @@ function applyFilter() {
     const visibleData = filteredData;  // Limite d'affichage
     const svgWidth = Math.max(filteredData.length * 50, 500);   // Largeur totale pour toutes les données
 
-    // Définissez la largeur du SVG pour permettre le défilement horizontal
-    const svg = d3.select("svg")
-        .attr("width", svgWidth); // Assurez-vous que cette largeur soit suffisante pour scroll
-
+    const svg = d3.select("svg").attr("width", svgWidth);
     svg.selectAll("*").remove();
 
-    // Configuration des marges et dimensions internes
     const margin = { top: 20, right: 30, bottom: 40, left: 40 },
         width = svgWidth - margin.left - margin.right,
         height = +svg.attr("height") - margin.top - margin.bottom;
-
 
     const x = d3.scaleBand()
         .domain(visibleData.map(d => d.artist_name))
@@ -114,9 +109,8 @@ function applyFilter() {
 
     const tooltip = d3.select("#tooltip");
 
-    // Échelle de couleur du vert (pour les carrières courtes) au rouge (pour la carrière la plus longue)
     const colorScale = d3.scaleLinear()
-        .domain([0, d3.max(visibleData, d => d.date_difference_years)])  // Min et max de la durée de carrière
+        .domain([0, d3.max(visibleData, d => d.date_difference_years)])
         .range(["yellow", "red"]);
 
     const defs = svg.append("defs");
@@ -126,15 +120,10 @@ function applyFilter() {
             .attr("x1", "0%")
             .attr("y1", "100%")
             .attr("x2", "0%")
-            .attr("y2", "0%");  // Dégradé du bas vers le haut
+            .attr("y2", "0%");
 
-        gradient.append("stop")
-            .attr("offset", "0%")
-            .attr("stop-color", "yellow");  // Vert en bas
-
-        gradient.append("stop")
-            .attr("offset", "100%")
-            .attr("stop-color", colorScale(d.date_difference_years)); // Couleur variable en fonction de la durée
+        gradient.append("stop").attr("offset", "0%").attr("stop-color", "yellow");
+        gradient.append("stop").attr("offset", "100%").attr("stop-color", colorScale(d.date_difference_years));
     });
 
     svg.append("g")
@@ -144,10 +133,9 @@ function applyFilter() {
         .attr("x", d => x(d.artist_name))
         .attr("y", d => y(d.date_difference_years))
         .attr("height", d => y(0) - y(d.date_difference_years))
-        .attr("width", x.bandwidth() * 1.5)  // Multipliez la largeur pour élargir les barres
+        .attr("width", x.bandwidth() * 1.5)
         .attr("fill", (d, i) => `url(#gradient-${i})`)
         .on("mouseover", (event, d) => {
-
             tooltip.style("opacity", 1)
                 .html(" Artiste : "+d.artist_name +"<br> Durée de carrière : " + d.date_difference_years + " ans");
         })
@@ -159,8 +147,22 @@ function applyFilter() {
             tooltip.style("opacity", 0);
         });
 
+    svg.append("line")
+        .attr("x1", margin.left)
+        .attr("x2", width + margin.left)
+        .attr("y1", y(averageCareerDuration))
+        .attr("y2", y(averageCareerDuration))
+        .attr("stroke", "black")
+        .attr("stroke-dasharray", "10")  // Ligne pointillée pour distinguer
+        .attr("stroke-width", 4);
 
-    // Axes
+    svg.append("text")
+        .attr("x", margin.left)
+        .attr("y", y(averageCareerDuration) - 5)
+        .text("Durée moyenne : " + averageCareerDuration.toFixed(1) + " ans")
+        .attr("fill", "black")
+        .attr("font-size", "25px");
+
     svg.append("g")
         .attr("transform", `translate(0,${height - margin.bottom})`)
         .call(d3.axisBottom(x))
@@ -183,5 +185,5 @@ function applyFilter() {
 
     svg.append("g")
         .attr("transform", `translate(${margin.left},0)`)
-        .call(d3.axisLeft(y).tickFormat(d => d + " ans"));  // Affiche les années
+        .call(d3.axisLeft(y).tickFormat(d => d + " ans"));
 }
