@@ -261,6 +261,7 @@ function updateChart() {
 
             Object.entries(percentages)
                 .sort((a, b) => b[1] - a[1])
+                .slice(0, 20)
                 .forEach(([genre, percentage]) => {
                     const value = displayMode === 'count'
                         ? d[genre]
@@ -275,6 +276,15 @@ function updateChart() {
                             <span class="tooltip-value">${valueText}</span>
                         </div>`;
                 });
+
+            // Ajouter une indication s'il y a plus de genres
+            const totalGenres = Object.keys(percentages).length;
+            if (totalGenres > 20) {
+                tooltipContent += `
+                    <div class="tooltip-row" style="margin-top: 8px; font-style: italic; color: #999;">
+                        Et ${totalGenres - 20} autres genres...
+                    </div>`;
+            }
 
             // Calculer la position du tooltip
             const tooltipWidth = 250; // Largeur approximative du tooltip
