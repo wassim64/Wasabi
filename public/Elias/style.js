@@ -213,10 +213,13 @@ function VerifParent(genre, data, genreParam) {
 
 d3.json('sous-genre.json').then(data => {
     const genreParam = getGenreFromUrl();
+    if(genreParam == null) {   
+        window.location.href = "../damien/index.html"
+    }
     let transformedData = transformData(data, genreParam);
 
     if (!transformedData) {
-        console.error(`Genre ou sous-genre "${genreParam}" non trouvé.`);
+        window.location.href = "../damien/index.html"
         return;
     }
     
@@ -289,6 +292,12 @@ d3.json('sous-genre.json').then(data => {
                 const yearStart = new URLSearchParams(window.location.search).get('start');
                 const yearEnd = new URLSearchParams(window.location.search).get('end');
                 window.location.href = `/public/wassim/choroplethMap.html?genre=${d.data.name}&start=${yearStart}&end=${yearEnd}`;
+            };
+            
+            document.getElementById('redirectBubble').onclick = () => {
+                const yearStart = new URLSearchParams(window.location.search).get('start');
+                const yearEnd = new URLSearchParams(window.location.search).get('end');
+                window.location.href = `../damien/index.html?genre=${d.data.name}&start=${yearStart}&end=${yearEnd}`;
             };
 
             document.getElementById('redirectGenre').onclick = () => {
