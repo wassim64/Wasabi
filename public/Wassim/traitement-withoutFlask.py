@@ -3,7 +3,7 @@ import ijson
 from collections import defaultdict
 from tqdm import tqdm  # Pour ajouter une barre de progression
 
-def process_choropleth_data(output_path='./choropleth_data.json', limit=5000):
+def process_choropleth_data(output_path='./choropleth_data.json', limit=3000000):
     """
     Traite les données d'album pour générer des statistiques par pays et par genre.
     
@@ -62,5 +62,5 @@ if __name__ == '__main__':
     # Vous pouvez personnaliser le chemin de sortie et la limite
     process_choropleth_data(
         output_path='./choropleth_data.json',
-        limit=5000
+        limit=3000000
     )
