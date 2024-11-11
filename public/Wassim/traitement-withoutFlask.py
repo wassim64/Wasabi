@@ -3,7 +3,7 @@ import ijson
 from collections import defaultdict
 from tqdm import tqdm  # Pour ajouter une barre de progression
 
-def process_choropleth_data(output_path='./choropleth_data.json', limit=3000000):
+def process_choropleth_data(output_path='./choropleth_data.json',  start_year=1950, end_year=2022, limit=3000000):
     """
     Traite les données d'album pour générer des statistiques par pays et par genre.
     
@@ -12,7 +12,7 @@ def process_choropleth_data(output_path='./choropleth_data.json', limit=3000000)
         limit (int): Nombre maximum d'albums à traiter
     """
     json_file_path = '../json/album.json'
-    genre_by_country = defaultdict(lambda: defaultdict(int))
+    genre_by_country = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
 
     print(f"Démarrage du traitement des données...")
     
@@ -27,15 +27,20 @@ def process_choropleth_data(output_path='./choropleth_data.json', limit=3000000)
                     
                 country = obj.get('country')
                 genre = obj.get('genre')
+                publication_date = obj.get('publicationDate') 
 
-                if country and genre:
-                    genre_by_country[country][genre] += 1
+                if country and genre and publication_date:
+                    try:
+                        year = int(publication_date)
+                        if start_year <= year <= end_year:
+                            genre_by_country[country][genre][year] += 1
+                    except ValueError:
+                        print(f"[WARNING] Invalid publicationDate format for entry: {publication_date}")
 
         # Conversion du defaultdict en dictionnaire standard pour la sérialisation JSON
-        output_data = {
-            country: dict(genres)
-            for country, genres in genre_by_country.items()
-        }
+        output_data = {country: {genre: dict(years) for genre, years in genres.items()}
+                       for country, genres in genre_by_country.items()}
+        
 
         # Sauvegarde des données dans un fichier JSON
         with open(output_path, 'w', encoding='utf-8') as f:
@@ -46,8 +51,9 @@ def process_choropleth_data(output_path='./choropleth_data.json', limit=3000000)
         
         # Afficher quelques statistiques
         total_entries = sum(
-            sum(genres.values())
+            sum(years.values())
             for genres in genre_by_country.values()
+            for years in genres.values()
         )
         print(f"[INFO] Nombre total d'entrées traitées: {total_entries}")
 
@@ -62,5 +68,7 @@ if __name__ == '__main__':
     # Vous pouvez personnaliser le chemin de sortie et la limite
     process_choropleth_data(
         output_path='./choropleth_data.json',
+        start_year=1950,
+        end_year=2022,
         limit=3000000
     )

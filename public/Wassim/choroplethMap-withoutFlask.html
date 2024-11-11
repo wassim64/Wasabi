@@ -110,7 +110,53 @@
         <option value="Emo">Emo</option>
 
         </select>
+
+        <label for="startYear">Start Year:</label>
+        <select id="startYear" onchange="updateMap()">
+            <option value="1950">1950</option>
+            <option value="1955">1955</option>
+            <option value="1960">1960</option>
+            <option value="1965">1965</option>
+            <option value="1970">1970</option>
+            <option value="1975">1975</option>
+            <option value="1980">1980</option>
+            <option value="1985">1985</option>
+            <option value="1990">1990</option>
+            <option value="1995">1995</option>
+            <option value="2000">2000</option>
+            <option value="2005">2005</option>
+            <option value="2010">2010</option>
+            <option value="2015">2015</option>
+            <option value="2020">2020</option>
+            
+        </select>
+    
+        <label for="endYear">End Year:</label>
+        <select id="endYear" onchange="updateMap()">
+            <option value="1950">1950</option>
+            <option value="1955">1955</option>
+            <option value="1960">1960</option>
+            <option value="1965">1965</option>
+            <option value="1970">1970</option>
+            <option value="1975">1975</option>
+            <option value="1980">1980</option>
+            <option value="1985">1985</option>
+            <option value="1990">1990</option>
+            <option value="1995">1995</option>
+            <option value="2000">2000</option>
+            <option value="2005">2005</option>
+            <option value="2010">2010</option>
+            <option value="2015">2015</option>
+            <option value="2020">2020</option>
+            
+        </select>
+        
+
+
     </div>
+
+
+
 
     <div id="legend" class="controls"></div>
     <svg width="960" height="600"></svg>
@@ -197,13 +243,28 @@
 
         function updateMap() {
             const selectedGenre = document.getElementById("genreChoice").value;
+            const startYear = parseInt(document.getElementById("startYear").value) || 1950;
+            const endYear = parseInt(document.getElementById("endYear").value) || new Date().getFullYear();
+
 
             let maxFrequency = 0;
-            for (const country in choroplethData) {
-                if (choroplethData[country][selectedGenre]) {
-                    maxFrequency = Math.max(maxFrequency, choroplethData[country][selectedGenre]);
+            const genreDataByCountry = {};
+
+    for (const country in choroplethData) {
+        const countryData = choroplethData[country][selectedGenre];
+
+        if (countryData) {
+            let totalCount = 0;
+            for (const year in countryData) {
+                const yearInt = parseInt(year);
+                if (yearInt >= startYear && yearInt <= endYear) {
+                    totalCount += countryData[year];
                 }
             }
+            genreDataByCountry[country] = totalCount;
+            maxFrequency = Math.max(maxFrequency, totalCount);
+        }
+    }
             colorScale.domain([0, maxFrequency]);
 
             svg.selectAll(".country")
@@ -212,9 +273,7 @@
                .style("fill", d => {
                    const countryCode3 = d.id;
                    const countryCode2 = Object.keys(isoCodes2To3).find(key => isoCodes2To3[key] === countryCode3);
-                   const genreCount = countryCode2 && choroplethData[countryCode2]
-                       ? choroplethData[countryCode2][selectedGenre] || 0
-                       : 0;
+                   const genreCount = countryCode2 && genreDataByCountry[countryCode2] || 0;
                    return genreCount > 0 ? colorScale(genreCount) : "#e0e0e0";
                });
 
