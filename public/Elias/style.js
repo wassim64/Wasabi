@@ -159,26 +159,26 @@ d3.json('sous-genre.json').then(data => {
 
         // Actions du menu
         document.getElementById('redirectTimeline').onclick = () => {
-            const yearStart = document.getElementById('yearStart').value;
-            const yearEnd = document.getElementById('yearEnd').value;
+            const yearStart = new URLSearchParams(window.location.search).get('start');
+            const yearEnd = new URLSearchParams(window.location.search).get('end');
             window.location.href = `/public/wassim/choroplethMap.html?genre=${d.data.name}&start=${yearStart}&end=${yearEnd}`;
         };
 
         document.getElementById('redirectNetwork').onclick = () => {
-            const yearStart = document.getElementById('yearStart').value;
-            const yearEnd = document.getElementById('yearEnd').value;
+            const yearStart = new URLSearchParams(window.location.search).get('start');
+            const yearEnd = new URLSearchParams(window.location.search).get('end');
             window.location.href = `/public/romain/boxDiagram.html?genre=${d.data.name}&start=${yearStart}&end=${yearEnd}`;
         };
 
         document.getElementById('redirectBubble').onclick = () => {
-            const yearStart = document.getElementById('yearStart').value;
-            const yearEnd = document.getElementById('yearEnd').value;
+            const yearStart = new URLSearchParams(window.location.search).get('start');
+            const yearEnd = new URLSearchParams(window.location.search).get('end');
             window.location.href = `/public/elias/index.html?genre=${d.data.name}&start=${yearStart}&end=${yearEnd}`;
         };
 
         document.getElementById('redirectWordcloud').onclick = () => {
-            const yearStart = document.getElementById('yearStart').value;
-            const yearEnd = document.getElementById('yearEnd').value;
+            const yearStart = new URLSearchParams(window.location.search).get('start');
+            const yearEnd = new URLSearchParams(window.location.search).get('end');
             window.location.href = `/public/karim/index.html?genre=${d.data.name}&start=${yearStart}&end=${yearEnd}`;
         };
 
