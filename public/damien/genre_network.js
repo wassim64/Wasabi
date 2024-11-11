@@ -247,18 +247,6 @@ function updateVisualization() {
             contextMenu.style.display = 'none';
         };
 
-        document.getElementById('redirectTimeline').onclick = () => {
-            const yearStart = document.getElementById('yearStart').value;
-            const yearEnd = document.getElementById('yearEnd').value;
-            window.location.href = `/public/wassim/choroplethMap.html?genre=${d.id}&start=${yearStart}&end=${yearEnd}`;
-        };
-
-        document.getElementById('redirectNetwork').onclick = () => {
-            const yearStart = document.getElementById('yearStart').value;
-            const yearEnd = document.getElementById('yearEnd').value;
-            window.location.href = `/public/romain/boxDiagram.html?genre=${d.id}&start=${yearStart}&end=${yearEnd}`;
-        };
-
         document.getElementById('redirectBubble').onclick = () => {
             const yearStart = document.getElementById('yearStart').value;
             const yearEnd = document.getElementById('yearEnd').value;
