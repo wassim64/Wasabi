@@ -6,12 +6,59 @@ from itertools import combinations
 from tqdm import tqdm  # Pour la barre de progression
 
 def clean_genre_name(genre):
-    # Nettoyer les caractères HTML
-    cleaned = genre.replace('&#x200e;', '').replace('&#x200f;', '')
-    # Si après nettoyage le genre est différent, on peut ajouter un suffixe pour le différencier
-    if cleaned != genre:
-        return f"{cleaned} (variant)"
-    return cleaned
+    if not genre:
+        return ""
+        
+    # Dictionnaire de conversion des caractères spéciaux HTML
+    html_chars = {
+        # Caractères portugais/espagnols
+        '&#xe3;': 'ã',    # ã
+        '&#xf5;': 'õ',    # õ
+        '&#xf1;': 'ñ',    # ñ
+        
+        # Caractères français
+        '&#xe9;': 'é',    # é
+        '&#xe8;': 'è',    # è
+        '&#xea;': 'ê',    # ê
+        '&#xe0;': 'à',    # à
+        '&#xe2;': 'â',    # â
+        '&#xf4;': 'ô',    # ô
+        '&#xfb;': 'û',    # û
+        '&#xee;': 'î',    # î
+        '&#xef;': 'ï',    # ï
+        '&#xe7;': 'ç',    # ç
+        
+        # Caractères espagnols
+        '&#xed;': 'í',    # í
+        '&#xe1;': 'á',    # á
+        '&#xf3;': 'ó',    # ó
+        '&#xfa;': 'ú',    # ú
+        
+        # Caractères allemands
+        '&#xe4;': 'ä',    # ä
+        '&#xeb;': 'ë',    # ë
+        '&#xfc;': 'ü',    # ü
+        '&#xff;': 'ÿ',    # ÿ
+        
+        # Caractères spéciaux
+        '&#x200e;': '',   # Marqueur gauche-à-droite
+        '&#x200f;': '',   # Marqueur droite-à-gauche
+        '&amp;': '&',     # &
+        '&apos;': "'",    # '
+        '&quot;': '"',    # "
+        '&lt;': '<',      # <
+        '&gt;': '>'       # >
+    }
+    
+    # Conversion en minuscules
+    genre = genre.lower()
+    
+    # Remplacement des caractères spéciaux
+    for html, char in html_chars.items():
+        genre = genre.replace(html, char)
+    
+    # Nettoyage des espaces
+    return genre.strip()
 
 def process_genre_connections():
     # Configuration des chemins
