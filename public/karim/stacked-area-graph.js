@@ -56,6 +56,8 @@ function populateSelectors() {
     const genres = new Set();
     // Années
     const years = Object.keys(data).sort((a, b) => a.localeCompare(b));
+    // Pays
+    updateCountrySelect();
 
     Object.values(data).forEach(yearData => {
         Object.keys(yearData).forEach(genre => genres.add(genre));
@@ -87,7 +89,7 @@ function updateChart() {
 
     // Vérifier si nous avons des données valides
     if (!filteredData || filteredData.length === 0) {
-        console.log("Pas de données à afficher");
+        alert("Pas de données à afficher");
         return;
     }
 
@@ -366,6 +368,37 @@ function processData(startYear, endYear, selectedGenre) {
         .sort((a, b) => a.localeCompare(b));
 
     const displayMode = document.getElementById('displayMode').value;
+    const selectedCountry = document.getElementById('countrySelect').value;
+
+    // Filtrer par pays si un pays est sélectionné
+    if (selectedCountry) {
+        // Créer une copie profonde des données pour ne pas modifier l'original
+        const filteredData = JSON.parse(JSON.stringify(data));
+        
+        years.forEach(year => {
+            Object.keys(filteredData[year]).forEach(genre => {
+                const genreData = filteredData[year][genre];
+                
+                // Filtrer les artistes par pays
+                const filteredArtists = Object.values(genreData.artists).filter(
+                    artist => artist.country === selectedCountry
+                );
+            
+                // Recalculer les statistiques pour ce genre
+                if (filteredArtists.length > 0) {
+                    genreData.count = filteredArtists.reduce((sum, artist) => sum + artist.count, 0);
+                    genreData.rank_sum = filteredArtists.reduce((sum, artist) => sum + artist.rank_sum, 0);
+                    genreData.rank_avg = genreData.rank_sum / genreData.count;
+                } else {
+                    // Si aucun artiste du pays sélectionné, supprimer le genre
+                    delete filteredData[year][genre];
+                }
+            });
+        });
+        
+        // Remplacer les données originales par les données filtrées
+        data = filteredData;
+    }
 
     years.forEach(year => {
         const yearData = {
@@ -402,12 +435,9 @@ function setupEventListeners() {
         });
     });
 
+    // Ajouter l'écouteur pour le bouton reset
     document.getElementById('resetFilters').addEventListener('click', () => {
-        document.getElementById('genreSelect').value = '';
-        document.getElementById('countrySelect').value = '';
-        const years = Object.keys(data).sort((a, b) => a.localeCompare(b));
-        document.getElementById('startYear').value = years[0];
-        document.getElementById('endYear').value = years[years.length - 1];
+        resetFilters();
         updateChart();
         updateUrlParameters();
     });
@@ -443,21 +473,24 @@ function getTop5Artists(yearData, genre) {
     if (!yearData) return [];
     const artists = new Map();
     const displayMode = document.getElementById('displayMode').value;
+    const selectedCountry = document.getElementById('countrySelect').value;
 
     // Parcourir les genres
     Object.entries(yearData).forEach(([g, genreData]) => {
         if (!genre || g === genre) {
             // Accéder directement aux artistes du genre
             Object.entries(genreData.artists).forEach(([artistId, artistData]) => {
-                if (!artists.has(artistId)) {
-                    artists.set(artistId, {
-                        name: artistData.name || 'Artiste inconnu',
-                        value: 0,
-                        count: 0,
-                        country: artistData.country || '',
-                        picture_small: artistData.picture_small || '',
-                        genre: g
-                    });
+                if (!selectedCountry || artistData.country === selectedCountry) {
+                    if (!artists.has(artistId)) {
+                        artists.set(artistId, {
+                            name: artistData.name || 'Artiste inconnu',
+                            value: 0,
+                            count: 0,
+                            country: artistData.country || '',
+                            picture_small: artistData.picture_small || '',
+                            genre: g
+                        });
+                    }
                 }
                 
                 const artist = artists.get(artistId);
@@ -480,7 +513,6 @@ function getTop5Artists(yearData, genre) {
         .sort((a, b) => b.value - a.value)
         .slice(0, 5);
 }
-
 // Ajouter ces fonctions
 function getTop5Albums(yearData, genre) {
     if (!yearData) return [];
@@ -692,4 +724,70 @@ function handleContextMenuClick(genre) {
 
     // Rediriger vers la page du diagramme en boîte
     window.location.href = `/public/romain/boxDiagram.html?${params.toString()}`;
+}
+
+// Ajouter cette nouvelle fonction pour récupérer tous les pays uniques
+function getAllCountries() {
+    const countries = new Set();
+    
+    // Parcourir toutes les années
+    Object.values(data).forEach(yearData => {
+        // Parcourir tous les genres
+        Object.values(yearData).forEach(genreData => {
+            // Parcourir tous les artistes
+            Object.values(genreData.artists).forEach(artist => {
+                if (artist.country) {
+                    countries.add(artist.country);
+                }
+            });
+        });
+    });
+
+    return Array.from(countries).sort()
+}
+
+// Ajouter cette fonction pour mettre à jour le select des pays
+function updateCountrySelect() {
+    const countrySelect = document.getElementById('countrySelect');
+    const countries = getAllCountries();
+    
+    
+    // Vider le select sauf l'option par défaut
+    countrySelect.innerHTML = '<option value="">Tous les pays</option>';
+    
+    // Ajouter les options des pays
+    countries.forEach(countryCode => {
+        const option = document.createElement('option');
+        option.value = countryCode;
+        // Obtenir le nom du pays en français
+        option.innerHTML = `${countryCode}`;
+        countrySelect.appendChild(option);
+    });
+}
+
+
+function resetFilters() {
+    // Recharger les données originales
+    d3.json('genre_evolution.json').then(rawData => {
+        // Réinitialiser les données globales
+        data = rawData;
+        
+        // Réinitialiser tous les filtres à leurs valeurs par défaut
+        const years = Object.keys(data).sort((a, b) => a.localeCompare(b));
+        
+        // Réinitialiser les années
+        document.getElementById('startYear').value = years[0];
+        document.getElementById('endYear').value = years[years.length - 1];
+        
+        // Réinitialiser les autres filtres
+        document.getElementById('genreSelect').value = '';
+        document.getElementById('countrySelect').value = '';
+        document.getElementById('displayMode').value = 'count';
+
+        // Nettoyer l'URL
+        window.history.replaceState({}, '', window.location.pathname);
+
+        // Mettre à jour le graphique avec les données réinitialisées
+        updateChart();
+    });
 }
