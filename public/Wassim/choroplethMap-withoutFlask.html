@@ -272,13 +272,14 @@
                     break;
                 }
             }
+        }
 
             document.getElementById("startYear").value = startYear;
             document.getElementById("endYear").value = endYear;
 
             updateMap();
         }
-    }
+    
 
 
 
@@ -390,9 +391,24 @@
             const countryCode3 = d.id;
             const countryCode2 = Object.keys(isoCodes2To3).find(key => isoCodes2To3[key] === countryCode3);
             const selectedGenre = document.getElementById("genreChoice").value.toLowerCase();
-            const genreCount = countryCode2 && choroplethData[countryCode2]
-                ? choroplethData[countryCode2][selectedGenre] || 0
-                : 0;
+            //const genreCount = countryCode2 && choroplethData[countryCode2]
+            //    ? choroplethData[countryCode2][selectedGenre] || 0
+            //    : 0;
+            
+            //const genreCount = genreData ? genreData : 0;
+            //const genreCount = countryCode2 && genreDataByCountry[countryCode2] ? genreDataByCountry[countryCode2] : 0;
+
+            let genreCount = 0;
+    if (countryCode2 && choroplethData[countryCode2] && choroplethData[countryCode2][selectedGenre]) {
+        // On récupère le total des chansons pour les années sélectionnées
+        const startYear = parseInt(document.getElementById("startYear").value) || 1950;
+        const endYear = parseInt(document.getElementById("endYear").value) || new Date().getFullYear();
+        const dataByYear = choroplethData[countryCode2][selectedGenre];
+
+        genreCount = Object.keys(dataByYear)
+            .filter(year => parseInt(year) >= startYear && parseInt(year) <= endYear)
+            .reduce((total, year) => total + dataByYear[year], 0);
+    }
 
             tooltip.style("opacity", 1)
                    .html(`${d.properties.name}: ${genreCount} songs`);
