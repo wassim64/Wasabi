@@ -26,7 +26,7 @@ def process_choropleth_data(output_path='./choropleth_data.json',  start_year=19
                     break
                     
                 country = obj.get('country')
-                genre = obj.get('genre')
+                genre = obj.get('genre').lower()
                 publication_date = obj.get('publicationDate') 
 
                 if country and genre and publication_date:
