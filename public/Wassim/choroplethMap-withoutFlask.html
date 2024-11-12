@@ -255,6 +255,8 @@
         function loadMapFromURL() {
             const urlParams = new URLSearchParams(window.location.search);
             const genre = urlParams.get("genre");
+            const startYear = urlParams.get("start") || "1950";
+            const endYear = urlParams.get("end") || "2020";
 
             if (genre) {
                 genre = genre.toLowerCase();
@@ -267,6 +269,10 @@
                     break;
                 }
             }
+
+            document.getElementById("startYear").value = startYear;
+            document.getElementById("endYear").value = endYear;
+
             updateMap();
         }
     }
@@ -380,7 +386,7 @@
         function handleMouseOver(event, d) {
             const countryCode3 = d.id;
             const countryCode2 = Object.keys(isoCodes2To3).find(key => isoCodes2To3[key] === countryCode3);
-            const selectedGenre = document.getElementById("genreChoice").value;
+            const selectedGenre = document.getElementById("genreChoice").value.toLowerCase();
             const genreCount = countryCode2 && choroplethData[countryCode2]
                 ? choroplethData[countryCode2][selectedGenre] || 0
                 : 0;
