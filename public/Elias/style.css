@@ -17,7 +17,6 @@ body {
     transition: fill 0.3s ease, stroke 0.3s ease; 
 }
 
-/* Texte des nœuds */
 .node text {
     font: 10px sans-serif;
     fill: #333; 
@@ -31,32 +30,27 @@ body {
     transition: stroke 0.3s ease, stroke-width 0.3s ease;
 }
 
-/* Liens et nœuds surlignés */
 .highlighted {
-    stroke-width: 3px !important; /* Largeur des liens surlignés */
-    stroke: red !important; /* Couleur des liens surlignés */
+    stroke-width: 3px !important; 
+    stroke: red !important;
     
 }
 
 
-
-/* Effet de survol des nœuds */
 .node:hover circle {
-    fill: #ffeb3b; /* Couleur jaune clair au survol */
-    stroke: #f39c12; /* Bordure orange au survol */
-    stroke-width: 2px; /* Largeur augmentée */
+    fill: #ffeb3b;
+    stroke: #f39c12; 
+    stroke-width: 2px; 
 }
 
-/* Effet de survol du texte des nœuds */
 .node:hover text {
-    fill: #f39c12; /* Texte orange au survol */
-    font-weight: bold; /* Mettre le texte en gras */
+    fill: #f39c12; 
+    font-weight: bold;
 }
 
-/* Effet de survol des liens */
 .link:hover {
-    stroke: #f39c12; /* Couleur orange au survol des liens */
-    stroke-width: 3px; /* Augmenter la largeur du lien au survol */
+    stroke: #f39c12; 
+    stroke-width: 3px; 
 }
 
 .context-menu {
@@ -70,7 +64,7 @@ body {
     z-index: 500;
     font-size: 0.7em;
     width: 30vh;
-    height: 20vh;
+    height: 12vh;
 
 }
 

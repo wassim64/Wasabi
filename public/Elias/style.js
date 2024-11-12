@@ -4,18 +4,14 @@ function getGenreFromUrl() {
 }
 
 function createGenreSelector(data) {
-    // Créer le conteneur pour le sélecteur
     const selectorContainer = d3.select('#genre-selector-root')
 
     console.log(selectorContainer)
-    // Ajouter un titre
-    // Créer la liste des genres
     const genreList = selectorContainer.append('ul')
         .style('list-style', 'none')
         .style('padding', '0')
         .style('margin', '0');
 
-    // Ajouter chaque genre principal comme un élément de la liste
     genreList.selectAll('li')
         .data(data)
         .enter()
@@ -58,7 +54,6 @@ function countSubgenres(genreData) {
     return count;
 }
 
-// Fonction pour rechercher un sous-genre dans les genres
 function findParentGenre(data, subgenreName) {
     for (let genre of data) {
         for (let sub of genre.subgenres) {
@@ -99,7 +94,6 @@ function findGenreInData(data, genreName) {
 }
 
 function transformData(data, selectedGenre) {
-    // Si le genre sélectionné est un genre principal
     const mainGenre = data.find(g => g.genre.toLowerCase() === selectedGenre.toLowerCase());
     if (mainGenre) {
         return {
@@ -114,16 +108,12 @@ function transformData(data, selectedGenre) {
             }]
         };
     }
-
-    // Trouver tous les parents du genre sélectionné
     const allParents = findAllParents(data, selectedGenre);
     
     if (allParents) {
-        // Construire l'arbre en remontant la hiérarchie
         let currentLevel = null;
         let selectedSubGenre = null;
-        
-        // Trouver le genre sélectionné et sa structure
+
         const findSelectedGenre = (parentGenre) => {
             for (let sub of parentGenre.subgenres) {
                 if (typeof sub === 'string' && sub.toLowerCase() === selectedGenre.toLowerCase()) {
@@ -135,7 +125,6 @@ function transformData(data, selectedGenre) {
                             children: sub.subgenres.map(s => ({ name: s }))
                         };
                     }
-                    // Recherche récursive dans les sous-genres
                     for (let deepSub of sub.subgenres) {
                         if (typeof deepSub === 'string' && deepSub.toLowerCase() === selectedGenre.toLowerCase()) {
                             return { name: deepSub };
@@ -146,27 +135,23 @@ function transformData(data, selectedGenre) {
             return null;
         };
 
-        // Construire l'arbre en remontant la hiérarchie
         for (let i = allParents.length - 1; i >= 0; i--) {
             const parentName = allParents[i];
             const parentGenre = findGenreInData(data, parentName);
             
             if (i === allParents.length - 1) {
-                // Dernier parent (le plus proche du genre sélectionné)
                 selectedSubGenre = findSelectedGenre(parentGenre);
                 currentLevel = {
                     name: parentName,
                     children: selectedSubGenre ? [selectedSubGenre] : []
                 };
             } else {
-                // Remonter la hiérarchie
                 currentLevel = {
                     name: parentName,
                     children: [currentLevel]
                 };
             }
         }
-
         return {
             name: "Genres",
             children: currentLevel ? [currentLevel] : []
@@ -178,7 +163,6 @@ function transformData(data, selectedGenre) {
 
 function findAllParents(data, subgenreName, parents = []) {
     for (let genre of data) {
-        // Vérifier si le sous-genre est directement dans les sous-genres du genre
         for (let sub of genre.subgenres) {
             if (typeof sub === 'string' && sub.toLowerCase() === subgenreName.toLowerCase()) {
                 parents.push(genre.genre); 
@@ -189,7 +173,6 @@ function findAllParents(data, subgenreName, parents = []) {
             }
         }
 
-        // Parcourir récursivement les sous-genres du genre
         for (let sub of genre.subgenres) {
             if (typeof sub === 'object') {
                 const updatedParents = [...parents, genre.genre];
@@ -229,11 +212,26 @@ d3.json('sous-genre.json').then(data => {
 
     if (selectedGenreData) {
         const subgenreCount = countSubgenres(selectedGenreData);
+
         selectorContainer = d3.select('#subgenreCount')
-            .style('font-size', '1.5em')
-            .text(`Nombre de sous-genres pour ${selectedGenreData.genre}: ${subgenreCount}`);
+        .style('font-size', '1.5em')
+        .text("Voici un arbre des sous-genres du genre " + genreParam)
+        .append("h3")
+        .text("cliquez sur un genre pour le selectionner")
+        .append("h3")
+        .text(`Nombre de sous-genres pour ${genreParam}: ${subgenreCount}`);
+    
+    }else{
+        selectorContainer = d3.select('#subgenreCount')
+        .style('font-size', '1.5em')
+        .text("Voici un arbre des sous-genres du genre " + genreParam)
+        .append("h3")
+        .text("cliquez sur un genre pour le selectionner")
+        .append("h3")
+        .text(`Nombre de sous-genres pour ${genreParam}: ${0}`);
     }
 
+  
 
     const width = window.innerWidth ;
     const height = window.innerHeight *1.5 ;
@@ -282,7 +280,6 @@ d3.json('sous-genre.json').then(data => {
         .style('fill', d => VerifParent(d.data.name, findAllParentsData, genreParam) ? 'blue' : '#333') // appliquer conditionnellement la couleur ici
         .text(d => d.data.name)
         .on('click', function(event, d) {
-            // Le reste du code du menu contextuel reste inchangé
             const contextMenu = document.getElementById('nodeContextMenu');
             contextMenu.style.display = 'block';
             contextMenu.style.left = `${event.pageX}px`;
