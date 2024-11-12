@@ -340,7 +340,7 @@ button:hover {
 }
 
 .overlay {
-    cursor: crosshair;
+    cursor: inherit;
 }
 
 .legend-item {
@@ -455,4 +455,10 @@ button:hover {
 
 .context-menu-icon {
     font-size: 16px;
+}
+
+
+/* Modifier le style overlay existant */
+.overlay {
+    cursor: inherit;
 }

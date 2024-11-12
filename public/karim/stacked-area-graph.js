@@ -9,6 +9,14 @@ let svg;
 let g;
 let tooltip;
 let contextMenu = null;
+let interactionMode = 'hover';
+let clip;
+let areaChart;
+let idleTimeout;
+
+function idled() { 
+    idleTimeout = null; 
+}
 
 // Créer le SVG
 function initializeSVG() {
@@ -19,6 +27,17 @@ function initializeSVG() {
 
     g = svg.append('g')
         .attr('transform', `translate(${margin.left},${margin.top})`);
+
+    clip = svg.append("defs").append("svg:clipPath")
+        .attr("id", "clip")
+        .append("svg:rect")
+        .attr("width", width)
+        .attr("height", height)
+        .attr("x", 0)
+        .attr("y", 0);
+
+    areaChart = g.append('g')
+        .attr("clip-path", "url(#clip)");
 
     tooltip = d3.select("body").append("div")
         .attr("class", "tooltip")
@@ -163,12 +182,12 @@ function updateChart() {
         .text('Année de sortie');
 
     // Dessiner les aires
-    const layers = g.selectAll('.layer')
+    areaChart = g.selectAll('.layer')
         .data(stack(filteredData))
         .enter().append('g')
         .attr('class', 'layer');
 
-    layers.append('path')
+    areaChart.append('path')
         .attr('class', 'area')
         .style('fill', d => color(d.key))
         .attr('d', area);
@@ -181,16 +200,16 @@ function updateChart() {
 
     function highlight(d) {
         // Réduire l'opacité de toutes les aires
-        layers.selectAll('.area')
+        areaChart.selectAll('.area')
             .style('opacity', 0.2);
         // Augmenter l'opacité de l'aire du genre sélectionné
-        layers.selectAll('.area')
+        areaChart.selectAll('.area')
             .filter(a => a.key === d)
             .style('opacity', 1);
     }
 
     function noHighlight() {
-        layers.selectAll('.area')
+        areaChart.selectAll('.area')
             .style('opacity', 1);
     }
 
@@ -263,100 +282,153 @@ function updateChart() {
         .style('pointer-events', 'all');
 
     // Gérer les interactions de l'overlay
-    overlay.on('mousemove', function() {
-        const [mouseX, mouseY] = d3.mouse(this);
-        const x0 = x.invert(mouseX);
-        const i = bisectDate(filteredData, x0, 1);
-        const d0 = filteredData[i - 1];
-        const d1 = filteredData[i];
-        const d = x0 - d0.year > d1.year - x0 ? d1 : d0;
-        const year = d.year.getFullYear().toString();
+    const interactionMode = document.getElementById('interactionMode').value;
+    
+    if (interactionMode === 'hover') {
+        // Mode hover avec tooltip
+        overlay
+            .style('cursor', 'crosshair')
+            .on('mousemove', function() {
+                const [mouseX, mouseY] = d3.mouse(this);
+                const x0 = x.invert(mouseX);
+                const i = bisectDate(filteredData, x0, 1);
+                const d0 = filteredData[i - 1];
+                const d1 = filteredData[i];
+                const d = x0 - d0.year > d1.year - x0 ? d1 : d0;
+                
+                // Mettre à jour la ligne de hover
+                hoverLine
+                    .attr('x1', mouseX)
+                    .attr('x2', mouseX)
+                    .style('opacity', 1);
 
-        // Mettre à jour la ligne de hover
-        hoverLine
-            .attr('x1', mouseX)
-            .attr('x2', mouseX)
-            .style('opacity', 1);
+                // Mise à jour du top 5 et du tooltip
+                const year = d.year.getFullYear().toString();
+                updateTop5Display(data[year], year, selectedGenre);
+                
+                // Calculer les pourcentages
+                const total = d.total;
+                const percentages = {};
+                Object.entries(d).forEach(([key, value]) => {
+                    if (key !== 'year' && key !== 'total') {
+                        percentages[key] = ((value / total) * 100).toFixed(1);
+                    }
+                });
 
-        // Mettre à jour le top 10 des albums
-        const selectedGenre = document.getElementById('genreSelect').value;
-        updateTop5Display(data[year], year, selectedGenre);
+                // Limiter le nombre de genres affichés 
+                const maxGenres = 10;
 
-        // Calculer les pourcentages
-        const total = d.total;
-        const percentages = {};
-        Object.entries(d).forEach(([key, value]) => {
-            if (key !== 'year' && key !== 'total') {
-                percentages[key] = ((value / total) * 100).toFixed(1);
-            }
-        });
+                // Créer le contenu du tooltip
+                let tooltipContent = `<strong>Année ${d.year.getFullYear()}</strong>`;
+                const displayMode = document.getElementById('displayMode').value;
 
-        // Limiter le nombre de genres affichés 
-        const maxGenres = 10;
+                Object.entries(percentages)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, maxGenres)
+                    .forEach(([genre, percentage]) => {
+                        const value = displayMode === 'count'
+                            ? d[genre]
+                            : Math.round(d[genre]);
+                        const valueText = displayMode === 'count'
+                            ? `${value} sons (${percentage}%)`
+                            : `Score: ${value} (${percentage}%)`;
 
-        // Créer le contenu du tooltip
-        let tooltipContent = `<strong>Année ${d.year.getFullYear()}</strong>`;
-        const displayMode = document.getElementById('displayMode').value;
+                        tooltipContent += `
+                            <div class="tooltip-row">
+                                <span class="tooltip-genre">${genre}</span>
+                                <span class="tooltip-value">${valueText}</span>
+                            </div>`;
+                    });
 
-        Object.entries(percentages)
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, maxGenres)
-            .forEach(([genre, percentage]) => {
-                const value = displayMode === 'count'
-                    ? d[genre]
-                    : Math.round(d[genre]);
-                const valueText = displayMode === 'count'
-                    ? `${value} sons (${percentage}%)`
-                    : `Score: ${value} (${percentage}%)`;
+                // Ajouter une indication s'il y a plus de genres
+                const totalGenres = Object.keys(percentages).length;
+                if (totalGenres > maxGenres) {
+                    tooltipContent += `
+                        <div class="tooltip-row" style="margin-top: 8px; font-style: italic; color: #999;">
+                            Et ${totalGenres - maxGenres} autres genres...
+                        </div>`;
+                }
 
-                tooltipContent += `
-                    <div class="tooltip-row">
-                        <span class="tooltip-genre">${genre}</span>
-                        <span class="tooltip-value">${valueText}</span>
-                    </div>`;
+                // Calculer la position du tooltip
+                const tooltipWidth = 250; // Largeur approximative du tooltip
+                const tooltipHeight = (Object.keys(percentages).length * 25) + 40; // Hauteur approximative
+
+                // Position par défaut (à droite du curseur)
+                let tooltipX = mouseX + margin.left + 20;
+                let tooltipY = mouseY + margin.top - (tooltipHeight / 2);
+
+                // Ajuster si le tooltip dépasse à droite
+                if (tooltipX + tooltipWidth > window.innerWidth) {
+                    tooltipX = mouseX + margin.left - tooltipWidth - 20;
+                }
+
+                // Ajuster si le tooltip dépasse en haut ou en bas
+                if (tooltipY < 0) {
+                    tooltipY = 10;
+                } else if (tooltipY + tooltipHeight > window.innerHeight) {
+                    tooltipY = window.innerHeight - tooltipHeight - 10;
+                }
+
+                // Positionner et afficher le tooltip
+                tooltip.transition()
+                    .duration(200)
+                    .style("opacity", 1);
+                tooltip.html(tooltipContent)
+                    .style("left", `${tooltipX}px`)
+                    .style("top", `${tooltipY}px`);
+            })
+            .on('mouseout', function() {
+                hoverLine.style('opacity', 0);
+                tooltip.style('opacity', 0);
             });
 
-        // Ajouter une indication s'il y a plus de genres
-        const totalGenres = Object.keys(percentages).length;
-        if (totalGenres > maxGenres) {
-            tooltipContent += `
-                <div class="tooltip-row" style="margin-top: 8px; font-style: italic; color: #999;">
-                    Et ${totalGenres - maxGenres} autres genres...
-                </div>`;
-        }
+        // Supprimer le brush s'il existe
+        g.select('.brush').remove();
+        
+    } else {
+        // Mode brush
+        overlay.style('pointer-events', 'none'); // Désactiver les événements sur l'overlay
 
-        // Calculer la position du tooltip
-        const tooltipWidth = 250; // Largeur approximative du tooltip
-        const tooltipHeight = (Object.keys(percentages).length * 25) + 40; // Hauteur approximative
-
-        // Position par défaut (à droite du curseur)
-        let tooltipX = mouseX + margin.left + 20;
-        let tooltipY = mouseY + margin.top - (tooltipHeight / 2);
-
-        // Ajuster si le tooltip dépasse à droite
-        if (tooltipX + tooltipWidth > window.innerWidth) {
-            tooltipX = mouseX + margin.left - tooltipWidth - 20;
-        }
-
-        // Ajuster si le tooltip dépasse en haut ou en bas
-        if (tooltipY < 0) {
-            tooltipY = 10;
-        } else if (tooltipY + tooltipHeight > window.innerHeight) {
-            tooltipY = window.innerHeight - tooltipHeight - 10;
-        }
-
-        // Positionner et afficher le tooltip
-        tooltip.transition()
-            .duration(200)
-            .style("opacity", 1);
-        tooltip.html(tooltipContent)
-            .style("left", `${tooltipX}px`)
-            .style("top", `${tooltipY}px`);
-    })
-    .on('mouseout', function() {
-        hoverLine.style('opacity', 0);
+        // Supprimer les événements hover
+        hoverLine.style('display', 'none');
         tooltip.style('opacity', 0);
-    });
+
+        // Créer le brush avec le bon curseur
+        const brushGroup = g.append('g')
+            .attr('class', 'brush')
+            .style('cursor', 'zoom-in'); // Appliquer le curseur ici
+
+        const brush = d3.brushX()
+            .extent([[0, 0], [width, height]])
+            .on('end', function() {
+                const extent = d3.event.selection;
+
+                if (!extent) {
+                    if (!idleTimeout) {
+                        // Double-clic détecté
+                        return idleTimeout = setTimeout(idled, 350);
+                    }
+                    // Réinitialiser le zoom
+                    const years = Object.keys(data).sort((a, b) => a.localeCompare(b));
+                    document.getElementById('startYear').value = years[0];
+                    document.getElementById('endYear').value = years[years.length - 1];
+                } else {
+                    // Zoom sur la sélection
+                    const [x0, x1] = extent.map(x.invert);
+                    document.getElementById('startYear').value = x0.getFullYear();
+                    document.getElementById('endYear').value = x1.getFullYear();
+                    // Nettoyer la sélection du brush
+                    brushGroup.call(brush.move, null);
+                }
+
+                // Mettre à jour l'URL et le graphique
+                updateUrlParameters();
+                updateChart();
+            });
+
+        // Appliquer le brush
+        brushGroup.call(brush);
+    }
 }
 
 
@@ -440,6 +512,11 @@ function setupEventListeners() {
         resetFilters();
         updateChart();
         updateUrlParameters();
+    });
+
+    document.getElementById('interactionMode').addEventListener('change', function() {
+        interactionMode = this.value;
+        updateChart(); // Recharger le graphique lors du changement de mode
     });
 }
 
@@ -791,3 +868,4 @@ function resetFilters() {
         updateChart();
     });
 }
+

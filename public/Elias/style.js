@@ -288,7 +288,7 @@ d3.json('sous-genre.json').then(data => {
             document.getElementById('redirectTimeline').onclick = () => {
                 const yearStart = new URLSearchParams(window.location.search).get('start');
                 const yearEnd = new URLSearchParams(window.location.search).get('end');
-                window.location.href = `/public/wassim/choroplethMap.html?genre=${d.data.name}&start=${yearStart}&end=${yearEnd}`;
+                window.location.href = `/public/wassim/choroplethMap-withoutFlask.html?genre=${d.data.name}&start=${yearStart}&end=${yearEnd}`;
             };
             
             document.getElementById('redirectBubble').onclick = () => {
