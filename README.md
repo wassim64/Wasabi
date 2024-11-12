@@ -5,7 +5,7 @@
 - Lancer le serveur avec la commande **npm start**
 - La visualisation sera disponible sur http://localhost:3000
 
-Ce projet vise à explorer les genres musicaux et leurs relations à travers différentes outils de visualisations. 
+Ce projet vise à explorer les genres musicaux et leurs relations avec différents paramétres à travers plusieurs outils de visualisations. 
 Il contient :
   - Une visualisation en arbre des genres musicaux, leurs sous-genres et leurs connexions hiérarchique. (Elias)
   - Une visualisation en réseau des liens entre genres selon les artistes. (Damien)
