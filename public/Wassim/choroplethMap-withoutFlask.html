@@ -5,6 +5,17 @@
     <title>Choropleth Map by Genre</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
+        body, h1, label, select, .tooltip, .back-button, #legend div {
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+        }
+        h1 {
+            text-align: center;
+            font-size: 24px;
+            margin-top: 20px;
+            color: #333;
+        }
+        
         .country {
             stroke: #fff;
             stroke-width: 0.5px;
@@ -30,9 +41,44 @@
             opacity: 0;
             transition: opacity 0.2s;
         }
+        .back-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: rgb(171, 171, 171);
+    color: white;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.back-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    background: rgb(115, 115, 115);
+}
+
+.back-icon {
+    font-size: 15px;
+    line-height: 1;
+}
+
+.back-text {
+    position: relative;
+    top: 1px;
+}
+
     </style>
 </head>
 <body>
+    <h1 style="text-align: center; font-size: 24px; margin-top: 20px;">Carte Choroplèthe des Genres Musicaux par Pays</h1>
+
+
     <div class="controls">
         <label for="genreChoice">Select Genre:</label>
         <select id="genreChoice" onchange="updateMap()">
@@ -156,15 +202,21 @@
     </div>
 
 
+    <div class="container">
+        <button id="backButton" class="back-button" onclick="goBack()">
+            <span class="back-icon">◄</span>
+            <span class="back-text">Retour </span>
+        </button>
+    </div>
 
 
     <div id="legend" class="controls"></div>
-    <svg width="960" height="600"></svg>
+    <svg width="720" height="450"></svg>
     <div id="tooltip" class="tooltip"></div>
 
     <script>
-        const width = 1200;
-        const height = 800;
+        const width = 9000;
+        const height = 600;
         const svg = d3.select("svg")
               .attr("width", width)
               .attr("height", height);
@@ -173,7 +225,7 @@
 
         const projection = d3.geoMercator()
                              .scale(150)
-                             .translate([width / 1.7, height / 1.5]);
+                             .translate([width / 12, height / 1.5]);
 
         const path = d3.geoPath().projection(projection);
         const colorScale = d3.scaleSequential(d3.interpolatePlasma);
@@ -291,6 +343,12 @@
                                 .attr("height", 50)
                                 .attr("transform", "translate(50, 0)");
 
+            d3.select("#legend")
+                .insert("div", ":first-child")
+                .text("Nombre de chansons")
+                .style("text-align", "center")
+                .style("margin-bottom", "5px");
+
             const legendScale = d3.scaleLinear()
                                   .domain([0, maxFrequency])
                                   .range([0, legendWidth]);
@@ -331,6 +389,20 @@
         function handleMouseOut() {
             tooltip.style("opacity", 0);
         }
+
+
+
+        function goBack() {
+    // Récupérer le genre sélectionné
+    const genre = document.getElementById('genreChoice').value;
+
+    // Construire l'URL avec les paramètres
+    const params = new URLSearchParams();
+    if (genre) params.set('genre', genre);
+
+    // Rediriger vers la page de ELIAS avec le genre en paramètre
+    window.location.href = `/public/Elias/index.html?${params.toString()}`;
+}
     </script>
 </body>
 </html>
