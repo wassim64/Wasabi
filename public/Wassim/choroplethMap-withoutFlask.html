@@ -254,9 +254,13 @@
 
         function loadMapFromURL() {
             const urlParams = new URLSearchParams(window.location.search);
+
             const genre = urlParams.get("genre");
             const startYear = urlParams.get("start") || "1950";
             const endYear = urlParams.get("end") || "2020";
+
+            
+
 
             if (genre) {
                 genre = genre.toLowerCase();
