@@ -67,8 +67,6 @@ def process_genre_evolution(limit=None):
                     'country': artist.get('location', {}).get('country', '')
                 }
 
-    print(f"Nombre d'artistes chargés: {len(artist_info)}")
-
     # Structure pour stocker les données
     genre_evolution = defaultdict(lambda: defaultdict(lambda: {
         "count": 0,

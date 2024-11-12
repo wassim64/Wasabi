@@ -68,18 +68,29 @@ function loadData() {
         
         // Appliquer les paramètres par défaut ou de l'URL
         const params = getUrlParameters();
+        const defaultGenre = 'rock';
+        const defaultStart = '1950';
+        const defaultEnd = '2024';
         
-        // Définir les valeurs par défaut
-        document.getElementById('yearStart').value = params.start || '1950';
-        document.getElementById('yearEnd').value = params.end || '2024';
-        document.getElementById('genreSelect').value = params.genre || 'rock';
+        // Vérifier si le genre de l'URL existe dans les données
+        const genreExists = genres.includes(params.genre);
+        
+        // Définir les valeurs en fonction de l'existence du genre
+        document.getElementById('yearStart').value = params.start || defaultStart;
+        document.getElementById('yearEnd').value = params.end || defaultEnd;
+        document.getElementById('genreSelect').value = genreExists ? params.genre : defaultGenre;
         document.getElementById('depthRange').value = '2';
         document.getElementById('depthValue').textContent = '2';
         document.getElementById('minConnections').value = '10';
         document.getElementById('connectionsValue').textContent = '10';
         
+        // Si le genre n'existe pas, mettre à jour l'URL avec les valeurs par défaut
+        if (params.genre && !genreExists) {
+            updateUrlParameters(defaultGenre, defaultStart, defaultEnd);
+        }
+        
         // Filtrer avec le genre initial
-        filterByGenre(params.genre || 'rock');
+        filterByGenre(genreExists ? params.genre : defaultGenre);
         
         setupEventListeners();
     });

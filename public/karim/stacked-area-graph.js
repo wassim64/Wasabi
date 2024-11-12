@@ -8,6 +8,7 @@ let data;
 let svg;
 let g;
 let tooltip;
+let contextMenu = null;
 
 // Créer le SVG
 function initializeSVG() {
@@ -55,6 +56,8 @@ function populateSelectors() {
     const genres = new Set();
     // Années
     const years = Object.keys(data).sort((a, b) => a.localeCompare(b));
+    // Pays
+    updateCountrySelect();
 
     Object.values(data).forEach(yearData => {
         Object.keys(yearData).forEach(genre => genres.add(genre));
@@ -86,7 +89,7 @@ function updateChart() {
 
     // Vérifier si nous avons des données valides
     if (!filteredData || filteredData.length === 0) {
-        console.log("Pas de données à afficher");
+        alert("Pas de données à afficher");
         return;
     }
 
@@ -206,6 +209,7 @@ function updateChart() {
         .append('g')
         .attr('class', 'legend-item')
         .attr('transform', (d, i) => `translate(0,${i * 25})`);
+        
 
     // Ajouter les rectangles de couleur
     legendItems.append('rect')
@@ -230,7 +234,8 @@ function updateChart() {
             return `${d} (${total} ${label})`;
         })
         .on("mouseover", highlight)
-        .on("mouseleave", noHighlight);
+        .on("mouseleave", noHighlight)
+        .on("click", handleLegendClick);
 
     // Ajouter un fond blanc semi-transparent à la légende
     legendContainer.insert('rect', ':first-child')
@@ -363,6 +368,37 @@ function processData(startYear, endYear, selectedGenre) {
         .sort((a, b) => a.localeCompare(b));
 
     const displayMode = document.getElementById('displayMode').value;
+    const selectedCountry = document.getElementById('countrySelect').value;
+
+    // Filtrer par pays si un pays est sélectionné
+    if (selectedCountry) {
+        // Créer une copie profonde des données pour ne pas modifier l'original
+        const filteredData = JSON.parse(JSON.stringify(data));
+        
+        years.forEach(year => {
+            Object.keys(filteredData[year]).forEach(genre => {
+                const genreData = filteredData[year][genre];
+                
+                // Filtrer les artistes par pays
+                const filteredArtists = Object.values(genreData.artists).filter(
+                    artist => artist.country === selectedCountry
+                );
+            
+                // Recalculer les statistiques pour ce genre
+                if (filteredArtists.length > 0) {
+                    genreData.count = filteredArtists.reduce((sum, artist) => sum + artist.count, 0);
+                    genreData.rank_sum = filteredArtists.reduce((sum, artist) => sum + artist.rank_sum, 0);
+                    genreData.rank_avg = genreData.rank_sum / genreData.count;
+                } else {
+                    // Si aucun artiste du pays sélectionné, supprimer le genre
+                    delete filteredData[year][genre];
+                }
+            });
+        });
+        
+        // Remplacer les données originales par les données filtrées
+        data = filteredData;
+    }
 
     years.forEach(year => {
         const yearData = {
@@ -399,12 +435,9 @@ function setupEventListeners() {
         });
     });
 
+    // Ajouter l'écouteur pour le bouton reset
     document.getElementById('resetFilters').addEventListener('click', () => {
-        document.getElementById('genreSelect').value = '';
-        document.getElementById('countrySelect').value = '';
-        const years = Object.keys(data).sort((a, b) => a.localeCompare(b));
-        document.getElementById('startYear').value = years[0];
-        document.getElementById('endYear').value = years[years.length - 1];
+        resetFilters();
         updateChart();
         updateUrlParameters();
     });
@@ -440,21 +473,24 @@ function getTop5Artists(yearData, genre) {
     if (!yearData) return [];
     const artists = new Map();
     const displayMode = document.getElementById('displayMode').value;
+    const selectedCountry = document.getElementById('countrySelect').value;
 
     // Parcourir les genres
     Object.entries(yearData).forEach(([g, genreData]) => {
         if (!genre || g === genre) {
             // Accéder directement aux artistes du genre
             Object.entries(genreData.artists).forEach(([artistId, artistData]) => {
-                if (!artists.has(artistId)) {
-                    artists.set(artistId, {
-                        name: artistData.name || 'Artiste inconnu',
-                        value: 0,
-                        count: 0,
-                        country: artistData.country || '',
-                        picture_small: artistData.picture_small || '',
-                        genre: g
-                    });
+                if (!selectedCountry || artistData.country === selectedCountry) {
+                    if (!artists.has(artistId)) {
+                        artists.set(artistId, {
+                            name: artistData.name || 'Artiste inconnu',
+                            value: 0,
+                            count: 0,
+                            country: artistData.country || '',
+                            picture_small: artistData.picture_small || '',
+                            genre: g
+                        });
+                    }
                 }
                 
                 const artist = artists.get(artistId);
@@ -477,7 +513,6 @@ function getTop5Artists(yearData, genre) {
         .sort((a, b) => b.value - a.value)
         .slice(0, 5);
 }
-
 // Ajouter ces fonctions
 function getTop5Albums(yearData, genre) {
     if (!yearData) return [];
@@ -596,4 +631,163 @@ function goBack() {
 
     // Rediriger vers la page de Damien avec les paramètres
     window.location.href = `/public/damien/index.html?${params.toString()}`;
+}
+
+function goToBoxDiagram() {
+    // Récupérer les paramètres actuels
+    const startYear = document.getElementById('startYear').value;
+    const endYear = document.getElementById('endYear').value;
+    const genre = document.getElementById('genreSelect').value;
+
+    // Construire l'URL avec les paramètres
+    const params = new URLSearchParams();
+    if (startYear) params.set('start', startYear);
+    if (endYear) params.set('end', endYear);
+    if (genre) params.set('genre', genre);
+
+    // Rediriger vers la page du diagramme en boîte avec les paramètres
+    window.location.href = `/public/romain/boxDiagram.html?${params.toString()}`;
+}
+
+
+function createContextMenu() {
+    if (!contextMenu) {
+        contextMenu = document.createElement('div');
+        contextMenu.className = 'context-menu';
+        document.body.appendChild(contextMenu);
+    }
+    return contextMenu;
+}
+
+// Modifier la création des éléments de la légende pour ajouter l'événement de clic
+function createLegendItem(genre, color) {
+    const item = document.createElement('div');
+    item.className = 'legend-item';
+    item.innerHTML = `
+        <div class="legend-color" style="background-color: ${color}"></div>
+        <span class="legend-text">${genre}</span>
+    `;
+    
+    item.addEventListener('click', () => handleLegendClick(genre));
+    return item;
+}
+
+function handleLegendClick(genre) {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+    
+    const menu = createContextMenu();
+    
+    // Positionner le menu au niveau du curseur
+    document.addEventListener('mousemove', function moveMenu(e) {
+        menu.style.display = 'block';
+        menu.style.left = (e.pageX - 350) + 'px';
+        menu.style.top = (e.pageY - 40) + 'px';
+        
+        // Supprimer l'écouteur après le premier mouvement
+        document.removeEventListener('mousemove', moveMenu);
+    });
+
+    // Contenu du menu
+    menu.innerHTML = `
+        <div class="context-menu-item" onclick="handleContextMenuClick('${genre}')">
+            <span class="context-menu-icon">📊</span>
+            Voir l'espérance de vie du genre <strong>"${genre}"
+        </div>
+    `;
+
+    // Fermer le menu au clic ailleurs
+    function closeMenu(e) {
+        if (!menu.contains(e.target)) {
+            menu.style.display = 'none';
+            document.removeEventListener('click', closeMenu);
+        }
+    }
+    
+    setTimeout(() => {
+        document.addEventListener('click', closeMenu);
+    }, 0);
+}
+
+function handleContextMenuClick(genre) {
+    // Récupérer les paramètres actuels
+    const startYear = document.getElementById('startYear').value;
+    const endYear = document.getElementById('endYear').value;
+
+    // Construire l'URL avec les paramètres
+    const params = new URLSearchParams();
+    if (startYear) params.set('start', startYear);
+    if (endYear) params.set('end', endYear);
+    params.set('genre', genre); // Toujours inclure le genre sélectionné
+
+    // Rediriger vers la page du diagramme en boîte
+    window.location.href = `/public/romain/boxDiagram.html?${params.toString()}`;
+}
+
+// Ajouter cette nouvelle fonction pour récupérer tous les pays uniques
+function getAllCountries() {
+    const countries = new Set();
+    
+    // Parcourir toutes les années
+    Object.values(data).forEach(yearData => {
+        // Parcourir tous les genres
+        Object.values(yearData).forEach(genreData => {
+            // Parcourir tous les artistes
+            Object.values(genreData.artists).forEach(artist => {
+                if (artist.country) {
+                    countries.add(artist.country);
+                }
+            });
+        });
+    });
+
+    return Array.from(countries).sort()
+}
+
+// Ajouter cette fonction pour mettre à jour le select des pays
+function updateCountrySelect() {
+    const countrySelect = document.getElementById('countrySelect');
+    const countries = getAllCountries();
+    
+    
+    // Vider le select sauf l'option par défaut
+    countrySelect.innerHTML = '<option value="">Tous les pays</option>';
+    
+    // Ajouter les options des pays
+    countries.forEach(countryCode => {
+        const option = document.createElement('option');
+        option.value = countryCode;
+        // Obtenir le nom du pays en français
+        option.innerHTML = `${countryCode}`;
+        countrySelect.appendChild(option);
+    });
+}
+
+
+function resetFilters() {
+    // Recharger les données originales
+    d3.json('genre_evolution.json').then(rawData => {
+        // Réinitialiser les données globales
+        data = rawData;
+        
+        // Réinitialiser tous les filtres à leurs valeurs par défaut
+        const years = Object.keys(data).sort((a, b) => a.localeCompare(b));
+        
+        // Réinitialiser les années
+        document.getElementById('startYear').value = years[0];
+        document.getElementById('endYear').value = years[years.length - 1];
+        
+        // Réinitialiser les autres filtres
+        document.getElementById('genreSelect').value = '';
+        document.getElementById('countrySelect').value = '';
+        document.getElementById('displayMode').value = 'count';
+
+        // Nettoyer l'URL
+        window.history.replaceState({}, '', window.location.pathname);
+
+        // Mettre à jour le graphique avec les données réinitialisées
+        updateChart();
+    });
 }

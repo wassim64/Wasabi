@@ -20,6 +20,10 @@ h1 {
     margin-bottom: 30px;
 }
 
+h4 {
+    text-align: center;
+}
+
 .controls {
     display: flex;
     flex-wrap: wrap;
@@ -385,4 +389,70 @@ button:hover {
 .back-button:active {
     transform: translateY(1px);
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.box-diagram-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #6b5b95, #574a7b);
+    color: white;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.box-diagram-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    background: linear-gradient(135deg, #574a7b, #6b5b95);
+}
+
+.box-diagram-button:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.diagram-icon {
+    font-size: 18px;
+    line-height: 1;
+}
+
+/* Ajouter ces nouveaux styles */
+.context-menu {
+    position: fixed;
+    background: white;
+    padding: 10px;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    z-index: 1100;
+    font-size: 14px;
+    min-width: 200px;
+    display: none;
+    
+}
+
+.context-menu-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #333;
+    transition: background-color 0.2s;
+    border-radius: 4px;
+}
+
+.context-menu-item:hover {
+    background-color: #f0f0f0;
+    color: #574a7b;
+}
+
+.context-menu-icon {
+    font-size: 16px;
 }
