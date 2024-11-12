@@ -255,11 +255,10 @@
         function loadMapFromURL() {
             const urlParams = new URLSearchParams(window.location.search);
 
-            const genre = urlParams.get("genre");
-            const startYear = urlParams.get("start") || "1950";
-            const endYear = urlParams.get("end") || "2020";
+            let startYear = urlParams.get("start") || "1950";
+            let endYear = urlParams.get("end") || "2020";
 
-            
+            let genre = urlParams.get("genre");
 
 
             if (genre) {
