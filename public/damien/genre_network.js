@@ -288,7 +288,7 @@ function updateVisualization() {
 
 // Fonction pour filtrer par genre et profondeur
 function filterByGenre(centralGenre) {
-    if (!centralGenre) return;
+    if (!centralGenre) return; // Protection contre les valeurs nulles
 
     const depth = parseInt(document.getElementById('depthRange').value);
     const minConnections = parseInt(document.getElementById('minConnections').value);
@@ -302,7 +302,7 @@ function filterByGenre(centralGenre) {
     while (currentDepth < depth) {
         const newFrontier = new Set();
         frontier.forEach(genre => {
-            currentData.links
+            originalData.links
                 .filter(link => {
                     const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
                     const targetId = typeof link.target === 'object' ? link.target.id : link.target;
@@ -323,22 +323,19 @@ function filterByGenre(centralGenre) {
         currentDepth++;
     }
 
-    currentData.nodes = currentData.nodes
+    currentData.nodes = originalData.nodes
         .filter(node => 
             includedGenres.has(node.id) && 
             node.songCount >= minSongs && 
             node.artistCount >= minArtists);
 
-    const activeNodeIds = new Set(currentData.nodes.map(n => n.id));
-    currentData.links = currentData.links
+    currentData.links = originalData.links
         .filter(link => {
             const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
             const targetId = typeof link.target === 'object' ? link.target.id : link.target;
             return includedGenres.has(sourceId) && 
                    includedGenres.has(targetId) && 
-                   link.weight >= minConnections &&
-                   activeNodeIds.has(sourceId) && 
-                   activeNodeIds.has(targetId);
+                   link.weight >= minConnections;
         });
 
     if (simulation) {
@@ -406,51 +403,30 @@ function setupEventListeners() {
     function filterByYearRange() {
         const yearStart = parseInt(document.getElementById('yearStart').value);
         const yearEnd = parseInt(document.getElementById('yearEnd').value);
-        const genre = document.getElementById('genreSelect').value;
-
-        // Créer une copie profonde des données originales
-        currentData = JSON.parse(JSON.stringify(originalData));
-
-        // Filtrer les nœuds
-        currentData.nodes = currentData.nodes.map(node => {
+        currentData.nodes = originalData.nodes.map(node => {
             const filteredNode = {...node};
-            let songCount = 0;
-            let artistCount = 0;
-
-            // Recalculer le nombre de chansons dans la plage d'années
+            let newSongCount = 0;
             Object.entries(node.years).forEach(([year, count]) => {
                 const yearNum = parseInt(year);
                 if (yearNum >= yearStart && yearNum <= yearEnd) {
-                    songCount += count;
+                    newSongCount += count;
                 }
             });
-
-            filteredNode.songCount = songCount;
-            return filteredNode;
-        }).filter(node => node.songCount > 0); // Garder uniquement les nœuds avec des chansons dans la plage
-
-        // Créer un Set des IDs des nœuds actifs pour une recherche plus rapide
-        const activeNodeIds = new Set(currentData.nodes.map(n => n.id));
-
-        // Filtrer les liens
-        currentData.links = currentData.links.filter(link => {
-            const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
-            const targetId = typeof link.target === 'object' ? link.target.id : link.target;
             
-            // Garder le lien uniquement si les deux nœuds existent encore
-            return activeNodeIds.has(sourceId) && activeNodeIds.has(targetId);
+            filteredNode.songCount = newSongCount;
+            return filteredNode;
+        }).filter(node => node.songCount > 0);
+    
+        const activeNodeIds = new Set(currentData.nodes.map(n => n.id));
+        currentData.links = originalData.links.filter(link => {
+            return activeNodeIds.has(link.source.id || link.source) && 
+                   activeNodeIds.has(link.target.id || link.target);
         });
-
-        // Mettre à jour la visualisation
-        if (simulation) {
-            simulation.stop();
-        }
-        updateVisualization();
+        simulation.nodes(currentData.nodes);
+        simulation.force('link').links(currentData.links);
+        simulation.alpha(0.3).restart();
         
-        // Si un genre central est sélectionné, réappliquer le filtre de genre
-        if (genre) {
-            filterByGenre(genre);
-        }
+        updateVisualization();
     }
 }
 
