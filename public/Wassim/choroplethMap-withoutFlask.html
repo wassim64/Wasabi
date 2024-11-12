@@ -254,14 +254,31 @@
 
         function loadMapFromURL() {
             const urlParams = new URLSearchParams(window.location.search);
-            const genre = urlParams.get("genre");
+
+            let startYear = urlParams.get("start") || "1950";
+            let endYear = urlParams.get("end") || "2020";
+
+            let genre = urlParams.get("genre");
+
 
             if (genre) {
-                document.getElementById("genreChoice").value = genre;
-                updateMap();
+                genre = genre.toLowerCase();
+                const genreSelect = document.getElementById("genreChoice");
+        
+            // Recherche et sélection du genre en ignorant les majuscules/minuscules
+            for (let i = 0; i < genreSelect.options.length; i++) {
+                if (genreSelect.options[i].value.toLowerCase() === genre) {
+                    genreSelect.selectedIndex = i;
+                    break;
+                }
             }
+
+            document.getElementById("startYear").value = startYear;
+            document.getElementById("endYear").value = endYear;
+
             updateMap();
         }
+    }
 
 
 
@@ -294,7 +311,7 @@
         };
 
         function updateMap() {
-            const selectedGenre = document.getElementById("genreChoice").value;
+            const selectedGenre = document.getElementById("genreChoice").value.toLowerCase();
             const startYear = parseInt(document.getElementById("startYear").value) || 1950;
             const endYear = parseInt(document.getElementById("endYear").value) || new Date().getFullYear();
 
@@ -372,7 +389,7 @@
         function handleMouseOver(event, d) {
             const countryCode3 = d.id;
             const countryCode2 = Object.keys(isoCodes2To3).find(key => isoCodes2To3[key] === countryCode3);
-            const selectedGenre = document.getElementById("genreChoice").value;
+            const selectedGenre = document.getElementById("genreChoice").value.toLowerCase();
             const genreCount = countryCode2 && choroplethData[countryCode2]
                 ? choroplethData[countryCode2][selectedGenre] || 0
                 : 0;

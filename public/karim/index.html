@@ -48,6 +48,14 @@
                 </select>
             </div>
             
+            <div class="control-group">
+                <label>Mode d'interaction :</label>
+                <select id="interactionMode">
+                    <option value="hover">Tooltip</option>
+                    <option value="brush">Zoom Brush</option>
+                </select>
+            </div>
+            
             <button id="resetFilters">Réinitialiser les filtres</button>
         </div>
 
@@ -93,6 +101,25 @@
                 <li><strong>Période :</strong> Permet de zoomer sur une période spécifique en définissant une année de début et de fin.</li>
                 <li><strong>Genre :</strong> Filtre les données pour ne voir que l'évolution d'un genre musical particulier.</li>
                 <li><strong>Pays :</strong> Permet de filtrer les données par pays d'origine des artistes.</li>
+            </ul>
+
+            <h3>🖱️ Les modes d'interaction</h3>
+            <ul>
+                <li><strong>Mode Tooltip :</strong> 
+                    <ul>
+                        <li>Passez la souris sur le graphique pour afficher une ligne verticale de référence</li>
+                        <li>Les données détaillées de l'année sélectionnée s'affichent dans une infobulle</li>
+                        <li>Les Top 5 se mettent à jour automatiquement selon la position du curseur</li>
+                    </ul>
+                </li>
+                <li><strong>Mode Zoom Brush :</strong>
+                    <ul>
+                        <li>Cliquez et faites glisser pour sélectionner une période spécifique</li>
+                        <li>Le graphique se met automatiquement à l'échelle de la période sélectionnée</li>
+                        <li>Double-cliquez n'importe où sur le graphique pour réinitialiser le zoom</li>
+                        <li>Les filtres de période sont automatiquement mis à jour selon la sélection</li>
+                    </ul>
+                </li>
             </ul>
         </div>
     </div>
